@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>수업 시간표 | 한국어 아카데미</title>
-  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 과목별 고유 전용 라인 수평 정렬, 깔끔한 투명 여백 지원">
+  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 24+ 풍부한 컬러 팔레트 & 사용자 지정 커스텀 색상 피커 지원">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -723,7 +723,7 @@
       border-radius: var(--r);
       box-shadow: var(--shadow-lg);
       width: 100%;
-      max-width: 540px;
+      max-width: 580px;
       max-height: 92vh;
       display: flex;
       flex-direction: column;
@@ -883,34 +883,66 @@
     #typeGroup input[value="어휘"]:checked + label  { background: var(--c-vocab);   border-color: var(--c-vocab); }
     #typeGroup input[value="문법"]:checked + label  { background: var(--c-grammar); border-color: var(--c-grammar); }
 
-    /* Color picker */
+    /* Expanded 24+ Color Picker Palette */
     .color-row { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
 
     .cswatch {
-      width: 26px; height: 26px;
+      width: 28px; height: 28px;
       border-radius: 50%;
       border: 2.5px solid transparent;
       cursor: pointer;
-      transition: transform .15s, border-color .15s;
+      transition: transform .15s, border-color .15s, box-shadow .15s;
       flex-shrink: 0;
+      position: relative;
     }
-    .cswatch:hover, .cswatch.on { transform: scale(1.25); border-color: var(--g800) !important; }
+    .cswatch:hover, .cswatch.on { transform: scale(1.25); border-color: var(--g800) !important; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
 
     .cswatch-auto {
-      width: 26px; height: 26px;
+      width: 28px; height: 28px;
       border-radius: 50%;
       border: 2px dashed var(--g400);
       background: conic-gradient(#ef4444 0%, #f59e0b 20%, #10b981 40%, #3b82f6 60%, #8b5cf6 80%, #ef4444 100%);
       cursor: pointer;
       transition: transform .15s;
       display: flex; align-items: center; justify-content: center;
-      font-size: .5rem;
+      font-size: .52rem;
       font-weight: 900;
       color: #fff;
       text-shadow: 0 0 3px rgba(0,0,0,.8);
       flex-shrink: 0;
     }
     .cswatch-auto:hover, .cswatch-auto.on { transform: scale(1.25); }
+
+    /* Custom Color Wheel Picker Button */
+    .cswatch-custom-picker {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 14px;
+      border: 1.5px dashed var(--g400);
+      background: var(--g100);
+      font-size: .74rem;
+      font-weight: 700;
+      color: var(--g700);
+      cursor: pointer;
+      transition: all .16s;
+      position: relative;
+      overflow: hidden;
+    }
+    .cswatch-custom-picker:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-lt);
+    }
+    .cswatch-custom-picker input[type="color"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
 
     /* Modal footer */
     .modal-foot {
@@ -1170,9 +1202,9 @@
           </div>
         </div>
 
-        <!-- 색상 -->
+        <!-- 색상 (Expanded Palette + Custom Picker) -->
         <div class="form-row">
-          <label class="form-label">카드 색상 <em>자동 = 유형 기본색</em></label>
+          <label class="form-label">카드 색상 <em>24개 풍부한 색상 + 커스텀 팔레트 지원</em></label>
           <div class="color-row" id="colorRow"></div>
         </div>
 
@@ -1221,10 +1253,14 @@
     };
     const DEF_CLR = { bg:'#f3f4f6', txt:'#374151', brd:'#9ca3af' };
 
+    // Rich 24 Presets Palette
     const COLOR_PRESETS = [
-      '#ef4444','#f97316','#f59e0b','#84cc16',
-      '#10b981','#06b6d4','#3b82f6','#8b5cf6',
-      '#ec4899','#b71254','#6b7280','#1f2937',
+      '#ef4444', '#f97316', '#f59e0b', '#84cc16',
+      '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6',
+      '#ec4899', '#b71254', '#e11d48', '#d946ef',
+      '#7c3aed', '#4f46e5', '#2563eb', '#0284c7',
+      '#0d9488', '#059669', '#16a34a', '#65a30d',
+      '#d97706', '#ea580c', '#64748b', '#1f2937'
     ];
 
     const SECRET_MASTER_RECOVERY_CODE = '0000';
@@ -1455,7 +1491,6 @@
         tr.appendChild(ttd);
 
         /* 🌟 DEDICATED SUB-ROW PER UNIQUE SUBJECT 🌟 */
-        // Each distinct subject gets its OWN fixed, exclusive line across the time slot
         const slotSubjectKeys = [];
         currentData.forEach(c => {
           if (getSlotsOfClass(c).includes(slot.i)) {
@@ -1547,7 +1582,6 @@
           );
 
           if (slotSubjectKeys.length > 1 && dayClasses.length > 0) {
-            // Find highest dedicated sub-row index required for this day
             let maxSubRowIdx = -1;
             slotSubjectKeys.forEach((subjKey, subIdx) => {
               if (dayClasses.some(dc => (dc.subject || '').trim() === subjKey)) {
@@ -1556,13 +1590,12 @@
             });
 
             slotSubjectKeys.forEach((subjKey, subIdx) => {
-              if (subIdx > maxSubRowIdx) return; // Skip trailing empty spacers
+              if (subIdx > maxSubRowIdx) return;
 
               const cls = dayClasses.find(dc => (dc.subject || '').trim() === subjKey);
               if (cls) {
                 td.appendChild(makeCard(cls, day.key, slot.i, subIdx, slotSubjectKeys.length));
               } else {
-                // Completely INVISIBLE layout spacer placeholder (No dashed box!)
                 const ph = document.createElement('div');
                 ph.className = 'cls-card-placeholder';
                 td.appendChild(ph);
@@ -1882,7 +1915,7 @@
 
     if (showMY) document.getElementById('heroMyBadge').style.display = '';
 
-    /* ── COLOR PICKER ── */
+    /* ── EXPANDED 24 COLOR PICKER PALETTE & CUSTOM COLOR WHEEL ── */
     function buildColorPicker() {
       const row = document.querySelector('#colorRow');
       row.innerHTML = '';
@@ -1896,7 +1929,7 @@
       auto.addEventListener('click', () => { pickColor = null; refreshSwatches(); });
       row.appendChild(auto);
 
-      /* Preset swatches */
+      /* Preset swatches (24 colors) */
       COLOR_PRESETS.forEach(hex => {
         const sw = document.createElement('div');
         sw.className = 'cswatch' + (pickColor === hex ? ' on' : '');
@@ -1906,6 +1939,21 @@
         sw.addEventListener('click', () => { pickColor = hex; refreshSwatches(); });
         row.appendChild(sw);
       });
+
+      /* Custom Color Picker Swatch */
+      const customWrap = document.createElement('label');
+      customWrap.className = 'cswatch-custom-picker';
+      customWrap.title = '원하는 색상을 직접 선택하기';
+      customWrap.innerHTML = `
+        🎨 직접 선택
+        <input type="color" id="customColorInput" value="${pickColor && pickColor.startsWith('#') ? pickColor : '#3b82f6'}">
+      `;
+      const colorInput = customWrap.querySelector('input');
+      colorInput.addEventListener('input', e => {
+        pickColor = e.target.value;
+        refreshSwatches();
+      });
+      row.appendChild(customWrap);
     }
 
     function refreshSwatches() {
@@ -1916,6 +1964,10 @@
         sw.classList.toggle('on', isOn);
         sw.style.borderColor = isOn ? '#1f2937' : 'transparent';
       });
+      const customInput = document.getElementById('customColorInput');
+      if (customInput && pickColor) {
+        customInput.value = pickColor;
+      }
     }
 
     /* ── MODAL ── */
