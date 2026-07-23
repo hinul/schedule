@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>수업 시간표 | 한국어 아카데미</title>
+  <meta name="description" content="한국어 아카데미 주간 수업 시간표 - 초급, 중급, 고급 듣기/읽기 수업 안내">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --primary:#b71254;--primary-dk:#8e0d3f;--primary-lt:#f9e4ee;
+      --bg:#f7f8fc;--white:#fff;
+      --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;
+      --gray-400:#9ca3af;--gray-600:#4b5563;--gray-800:#1f2937;
+      --shadow-sm:0 1px 3px rgba(0,0,0,.08);
+      --shadow-md:0 4px 16px rgba(0,0,0,.10);
+      --radius:12px;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--gray-800);min-height:100vh}
+    header{background:var(--white);box-shadow:var(--shadow-sm);position:sticky;top:0;z-index:100}
+    .header-inner{max-width:1100px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between}
+    .logo{font-family:'Montserrat','Noto Sans KR',sans-serif;font-size:1.2rem;font-weight:700;color:var(--primary);letter-spacing:-.02em;text-decoration:none}
+    .logo span{color:var(--gray-800)}
+    .header-badge{background:var(--primary);color:#fff;font-size:.72rem;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:.05em}
+    .hero{background:linear-gradient(135deg,var(--primary-dk) 0%,var(--primary) 60%,#e84393 100%);color:#fff;padding:56px 24px 48px;text-align:center;position:relative;overflow:hidden}
+    .hero-label{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(8px);padding:5px 18px;border-radius:20px;font-size:.78rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px}
+    .hero h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:900;line-height:1.25;margin-bottom:12px;letter-spacing:-.03em;animation:fadeUp .35s ease both}
+    .hero p{font-size:.95rem;opacity:.88;font-weight:300;animation:fadeUp .45s ease both}
+    .legend-bar{background:var(--white);border-bottom:1px solid var(--gray-200)}
+    .legend-inner{max-width:1100px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;flex-wrap:wrap;gap:10px 20px}
+    .legend-title{font-size:.75rem;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase}
+    .legend-item{display:flex;align-items:center;gap:6px;font-size:.8rem;font-weight:500;color:var(--gray-600);padding:3px 10px;border-radius:20px}
+    .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .filter-section{max-width:1100px;margin:28px auto 0;padding:0 24px}
+    .filter-groups{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+    .filter-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .filter-group-label{font-size:.72rem;font-weight:800;color:var(--gray-400);letter-spacing:.1em;text-transform:uppercase;min-width:52px;padding-right:4px;white-space:nowrap}
+    .filter-divider{width:1px;height:20px;background:var(--gray-200);flex-shrink:0}
+    .tab-btn{padding:7px 18px;border:1.5px solid var(--gray-200);background:var(--white);border-radius:24px;font-size:.82rem;font-weight:600;color:var(--gray-600);cursor:pointer;transition:all .18s;font-family:inherit}
+    .tab-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-lt)}
+    .tab-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(183,18,84,.25)}
+    .tab-btn[data-group="type"].active{background:#6d28d9;border-color:#6d28d9;box-shadow:0 2px 8px rgba(109,40,217,.25)}
+    .tab-btn[data-group="type"]:hover{border-color:#6d28d9;color:#6d28d9;background:#ede9fe}
+    .tab-btn[data-group="level"].active{background:#065f46;border-color:#065f46;box-shadow:0 2px 8px rgba(6,95,70,.25)}
+    .tab-btn[data-group="level"]:hover{border-color:#065f46;color:#065f46;background:#d1fae5}
+    .active-filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:24px;margin-bottom:4px;padding:0 2px}
+    .active-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 12px;border-radius:20px;font-size:.75rem;font-weight:700;cursor:pointer;transition:opacity .15s}
+    .active-chip.chip-type{background:#ede9fe;color:#6d28d9;border:1px solid #ddd6fe}
+    .active-chip.chip-level{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+    .active-chip.chip-period{background:var(--primary-lt);color:var(--primary);border:1px solid #f4b8d0}
+    .active-chip:hover{opacity:.75}
+    .chip-x{font-size:.8rem;line-height:1}
+    .no-result{text-align:center;padding:40px 0;color:var(--gray-400);font-size:.9rem}
+    .table-section{max-width:1100px;margin:0 auto 60px;padding:0 24px}
+    .table-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-md);overflow:hidden;border:1px solid var(--gray-200);animation:fadeUp .4s ease both}
+    .table-scroll{overflow-x:auto}
+    table.schedule{width:100%;border-collapse:collapse;font-size:.84rem;min-width:640px}
+    table.schedule thead tr{background:linear-gradient(135deg,var(--primary-dk),var(--primary));color:#fff}
+    table.schedule thead th{padding:14px 10px;font-weight:700;letter-spacing:.04em;text-align:center;font-size:.82rem}
+    table.schedule thead th:first-child{width:60px}
+    table.schedule thead th:nth-child(2){width:80px}
+    .period-cell{background:var(--gray-50);border-right:2px solid var(--gray-200);text-align:center;font-weight:800;font-size:.75rem;color:var(--primary);padding:0 6px;vertical-align:middle;letter-spacing:.06em;white-space:nowrap}
+    .time-cell{text-align:center;font-variant-numeric:tabular-nums;font-size:.8rem;font-weight:600;color:var(--gray-600);padding:10px 8px;border-right:1px solid var(--gray-200);white-space:nowrap;background:var(--gray-50);vertical-align:middle}
+    table.schedule tbody tr{border-bottom:1px solid var(--gray-200);transition:background .14s}
+    table.schedule tbody tr:last-child{border-bottom:none}
+    table.schedule tbody tr:hover td{background:#fdf2f7!important}
+    table.schedule tbody tr:hover .period-cell,table.schedule tbody tr:hover .time-cell{background:var(--primary-lt)!important}
+    .class-cell{padding:10px 8px;vertical-align:middle;text-align:center;border-right:1px solid var(--gray-200)}
+    .class-cell:last-child{border-right:none}
+    .class-pair{display:flex;flex-direction:column;gap:5px;align-items:center}
+    .class-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:.75rem;font-weight:600;white-space:nowrap;transition:transform .15s,box-shadow .15s;cursor:default}
+    .class-tag:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+    .tag-초급-듣기{background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe}
+    .tag-초급-읽기{background:#ede9fe;color:#6d28d9;border:1px solid #ddd6fe}
+    .tag-중급-듣기{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+    .tag-중급-읽기{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
+    .tag-고급-듣기{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+    .tag-고급-읽기{background:#fce7f3;color:#9d174d;border:1px solid #fbcfe8}
+    .empty-cell{color:var(--gray-400);font-size:.75rem}
+    .class-tag.dimmed{opacity:.12;filter:grayscale(1)}
+    td.class-cell.all-dimmed{opacity:.3}
+    tr.section-row td{background:linear-gradient(90deg,var(--primary-lt),var(--white));padding:7px 16px;font-size:.72rem;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:.14em;border-bottom:1px solid var(--primary-lt)}
+    footer{background:var(--gray-800);color:var(--gray-400);text-align:center;padding:28px 16px;font-size:.78rem}
+    footer strong{color:var(--white)}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:768px){.header-badge{display:none}.hero{padding:40px 16px 36px}.filter-section,.table-section{padding:0 12px}.legend-inner{padding:12px 16px}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#">한국어<span>Academy</span></a>
+    <span class="header-badge">주간 시간표</span>
+  </div>
+</header>
+<section class="hero">
+  <div class="hero-label">Weekly Schedule</div>
+  <h1>수업 시간표</h1>
+  <p>초급 · 중급 · 고급 &nbsp;|&nbsp; 듣기 · 읽기 &nbsp;|&nbsp; 오전 · 오후 · 저녁</p>
+</section>
+<div class="legend-bar">
+  <div class="legend-inner">
+    <span class="legend-title">범례</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#3b82f6"></span>초급 듣기</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#8b5cf6"></span>초급 읽기</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#10b981"></span>중급 듣기</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>중급 읽기</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#ef4444"></span>고급 듣기</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#f472b6"></span>고급 읽기</span>
+  </div>
+</div>
+<div class="filter-section">
+  <!-- 활성 필터 칩 -->
+  <div class="active-filters" id="activeFilters"></div>
+
+  <div class="filter-groups" id="filterGroups">
+    <!-- 수업 유형 -->
+    <div class="filter-group">
+      <span class="filter-group-label">수업유형</span>
+      <span class="filter-divider"></span>
+      <button class="tab-btn" data-group="type" data-filter="듣기" id="tab-listen">🎧 듣기</button>
+      <button class="tab-btn" data-group="type" data-filter="읽기" id="tab-read">📖 읽기</button>
+    </div>
+    <!-- 급별 -->
+    <div class="filter-group">
+      <span class="filter-group-label">급별</span>
+      <span class="filter-divider"></span>
+      <button class="tab-btn" data-group="level" data-filter="초급" id="tab-beginner">초급</button>
+      <button class="tab-btn" data-group="level" data-filter="중급" id="tab-intermediate">중급</button>
+      <button class="tab-btn" data-group="level" data-filter="고급" id="tab-advanced">고급</button>
+    </div>
+    <!-- 시간대 -->
+    <div class="filter-group">
+      <span class="filter-group-label">시간대</span>
+      <span class="filter-divider"></span>
+      <button class="tab-btn" data-group="period" data-filter="오전" id="tab-morning">오전</button>
+      <button class="tab-btn" data-group="period" data-filter="오후1" id="tab-afternoon1">오후1</button>
+      <button class="tab-btn" data-group="period" data-filter="오후2" id="tab-afternoon2">오후2</button>
+      <button class="tab-btn" data-group="period" data-filter="저녁" id="tab-evening">저녁</button>
+    </div>
+  </div>
+</div>
+<div class="table-section">
+  <div class="table-card">
+    <div class="table-scroll">
+      <table class="schedule" id="scheduleTable">
+        <thead>
+          <tr>
+            <th>시간대</th><th>시간</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<footer>
+  <strong>한국어 아카데미</strong> &nbsp;·&nbsp; 수업 시간표 &nbsp;·&nbsp; 문의: 02-570-4418
+</footer>
+<script>
+// ── DATA ──
+const rows=[
+  {p:'오전',t:'9:00',월:'초급 듣기 A / 초급 읽기 B / 중급 듣기 A',화:'초급 듣기 A / 초급 읽기 B / 중급 듣기 A',수:'초급 듣기 A / 초급 읽기 B / 중급 듣기 A',목:'초급 듣기 A / 초급 읽기 B / 중급 듣기 A',금:'초급 듣기 A / 초급 읽기 B / 중급 듣기 A'},
+  {p:'오전',t:'10:00',월:'초급 읽기 A / 초급 듣기 B / 중급 읽기 B',화:'초급 읽기 A / 초급 듣기 B / 중급 읽기 B',수:'초급 읽기 A / 초급 듣기 B / 중급 읽기 B',목:'초급 읽기 A / 초급 듣기 B / 중급 읽기 B',금:'초급 읽기 A / 초급 듣기 B / 중급 읽기 B'},
+  {p:'오전',t:'11:00',월:'중급 읽기 A / 고급 듣기 A / 고급 읽기 B',화:'중급 읽기 A / 고급 듣기 A / 고급 읽기 B',수:'중급 읽기 A / 고급 듣기 A / 고급 읽기 B',목:'중급 읽기 A / 고급 듣기 A / 고급 읽기 B',금:'중급 읽기 A / 고급 듣기 A / 고급 읽기 B'},
+  {p:'오전',t:'12:00',월:'중급 듣기 B / 고급 듣기 B / 고급 읽기 A',화:'중급 듣기 B / 고급 듣기 B / 고급 읽기 A',수:'중급 듣기 B / 고급 듣기 B / 고급 읽기 A',목:'중급 듣기 B / 고급 듣기 B / 고급 읽기 A',금:'중급 듣기 B / 고급 듣기 B / 고급 읽기 A'},
+  {p:'오후1',t:'13:00',월:'초급 듣기 A / 초급 읽기 B',화:'',수:'초급 듣기 A / 초급 읽기 B',목:'',금:'초급 듣기 B / 초급 읽기 B'},
+  {p:'오후1',t:'14:00',월:'초급 듣기 B / 초급 읽기 A',화:'',수:'초급 듣기 B / 초급 듣기 B',목:'',금:'초급 듣기 B / 초급 듣기 B'},
+  {p:'오후1',t:'15:00',월:'중급 듣기 A / 중급 읽기 B',화:'',수:'중급 듣기 A / 중급 읽기 B',목:'',금:'중급 듣기 A / 중급 읽기 B'},
+  {p:'오후2',t:'15:00',월:'중급 듣기 B / 중급 듣기 B',화:'',수:'중급 듣기 B / 중급 듣기 B',목:'',금:'중급 듣기 B / 중급 듣기 B'},
+  {p:'오후2',t:'16:00',월:'고급 듣기 A / 고급 읽기 B',화:'',수:'고급 듣기 A / 고급 읽기 B',목:'',금:'고급 듣기 A / 고급 읽기 B'},
+  {p:'오후2',t:'17:00',월:'고급 듣기 B / 고급 듣기 B',화:'',수:'고급 듣기 B / 고급 듣기 B',목:'',금:'고급 듣기 B / 고급 듣기 B'},
+  {p:'저녁',t:'19:00',월:'중급 읽기 A / 중급 듣기 B',화:'',수:'중급 읽기 A / 중급 듣기 B',목:'',금:'중급 읽기 A / 중급 듣기 B'},
+  {p:'저녁',t:'20:00',월:'중급 읽기 A / 중급 듣기 B',화:'',수:'중급 읽기 A / 중급 듣기 B',목:'',금:'중급 읽기 A / 중급 듣기 B'},
+  {p:'저녁',t:'21:00',월:'고급 듣기 A / 고급 읽기 B',화:'',수:'고급 듣기 A / 고급 읽기 B',목:'',금:'고급 듣기 A / 고급 읽기 B'},
+];
+
+const icons={'듣기':'🎧','읽기':'📖'};
+const tagClass={'초급-듣기':'tag-초급-듣기','초급-읽기':'tag-초급-읽기','중급-듣기':'tag-중급-듣기','중급-읽기':'tag-중급-읽기','고급-듣기':'tag-고급-듣기','고급-읽기':'tag-고급-읽기'};
+const chipClass={type:'chip-type',level:'chip-level',period:'chip-period'};
+const chipLabel={type:'유형',level:'급별',period:'시간'};
+
+// ── ACTIVE FILTERS STATE ──
+// Each group allows only one active value (or null = no filter)
+const activeFilters={type:null,level:null,period:null};
+
+// ── TAG HTML ──
+function classTagHtml(str,typeF,levelF){
+  const[lv,tp,g]=str.trim().split(' ');
+  const cls=tagClass[lv+'-'+tp]||'';
+  const ic=icons[tp]||'';
+  // dimmed when it doesn't match active filters
+  const typeOk=!typeF||tp===typeF;
+  const levelOk=!levelF||lv===levelF;
+  const dimmed=(typeOk&&levelOk)?'':' dimmed';
+  return`<span class="class-tag ${cls}${dimmed}">${ic} ${lv} ${tp} <b>${g||''}</b></span>`;
+}
+
+// ── CELL HTML ──
+function cellHtml(val,typeF,levelF){
+  if(!val)return'<td class="class-cell"><span class="empty-cell">—</span></td>';
+  const classes=val.split(' / ');
+  const tags=classes.map(s=>classTagHtml(s,typeF,levelF)).join('');
+  // if every tag in this cell is dimmed, mark cell as all-dimmed
+  const allDimmed=classes.every(s=>{
+    const[lv,tp]=s.trim().split(' ');
+    return (typeF&&tp!==typeF)||(levelF&&lv!==levelF);
+  });
+  return`<td class="class-cell${allDimmed?' all-dimmed':''}"><div class="class-pair">${tags}</div></td>`;
+}
+
+// ── BUILD TABLE ──
+function buildTable(){
+  const tbody=document.getElementById('tableBody');
+  tbody.innerHTML='';
+  const days=['월','화','수','목','금'];
+  const{type:typeF,level:levelF,period:periodF}=activeFilters;
+  let prevP='';
+  let anyRow=false;
+
+  rows.forEach(row=>{
+    // Period (time-of-day) filter: hide entire row if doesn't match
+    if(periodF&&row.p!==periodF)return;
+
+    // Level filter: hide row if no cell in this row contains the level
+    if(levelF&&!days.some(d=>(row[d]||'').includes(levelF)))return;
+
+    // Type filter: hide row if no cell in this row contains the type
+    if(typeF&&!days.some(d=>(row[d]||'').includes(typeF)))return;
+
+    anyRow=true;
+
+    // Section header
+    if(row.p!==prevP){
+      const sec=document.createElement('tr');
+      sec.className='section-row';
+      sec.innerHTML=`<td colspan="7">${row.p}</td>`;
+      tbody.appendChild(sec);
+      prevP=row.p;
+    }
+
+    const tr=document.createElement('tr');
+    let html=`<td class="period-cell">${row.p}</td><td class="time-cell">${row.t}</td>`;
+    days.forEach(d=>{html+=cellHtml(row[d]||'',typeF,levelF);});
+    tr.innerHTML=html;
+    tbody.appendChild(tr);
+  });
+
+  if(!anyRow){
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td colspan="7" class="no-result">조건에 맞는 수업이 없습니다.</td>';
+    tbody.appendChild(tr);
+  }
+}
+
+// ── RENDER ACTIVE CHIPS ──
+function renderChips(){
+  const container=document.getElementById('activeFilters');
+  container.innerHTML='';
+  let hasChip=false;
+  Object.entries(activeFilters).forEach(([group,val])=>{
+    if(!val)return;
+    hasChip=true;
+    const chip=document.createElement('span');
+    chip.className=`active-chip ${chipClass[group]}`;
+    chip.innerHTML=`${chipLabel[group]}: <b>${val}</b> <span class="chip-x">✕</span>`;
+    chip.addEventListener('click',()=>{
+      activeFilters[group]=null;
+      // deactivate button in this group
+      document.querySelectorAll(`.tab-btn[data-group="${group}"]`)
+        .forEach(b=>b.classList.remove('active'));
+      renderChips();
+      buildTable();
+    });
+    container.appendChild(chip);
+  });
+  container.style.display=hasChip?'flex':'none';
+}
+
+// ── BUTTON CLICK ──
+document.getElementById('filterGroups').addEventListener('click',e=>{
+  const btn=e.target.closest('.tab-btn');
+  if(!btn)return;
+  const group=btn.dataset.group;
+  const val=btn.dataset.filter;
+  if(!group||!val)return;
+
+  if(activeFilters[group]===val){
+    // toggle off
+    activeFilters[group]=null;
+    btn.classList.remove('active');
+  }else{
+    // deactivate previous in same group
+    document.querySelectorAll(`.tab-btn[data-group="${group}"]`)
+      .forEach(b=>b.classList.remove('active'));
+    activeFilters[group]=val;
+    btn.classList.add('active');
+  }
+  renderChips();
+  buildTable();
+});
+
+// ── INIT ──
+renderChips();
+buildTable();
+</script>
+</body>
+</html>
