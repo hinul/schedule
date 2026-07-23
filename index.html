@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>수업 시간표 | 한국어 아카데미</title>
-  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 자유로운 코스 조회, 과목별 자동 수평 정렬, 수정·삭제 전용 코스 비밀번호 보안">
+  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 1회 인증 원터치 편집 모드, 자유로운 수정·추가 후 잠금 지원">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -260,17 +260,35 @@
     }
     .course-select:focus { border-color: #38bdf8; }
 
-    .course-lock-status {
-      font-size: .75rem;
-      color: #facc15;
-      background: rgba(250,204,21,.1);
-      border: 1px solid rgba(250,204,21,.3);
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-weight: 600;
+    /* Lock / Edit Mode Toggle Button */
+    .btn-edit-mode {
+      font-size: .78rem;
+      padding: 4px 12px;
+      border-radius: 14px;
+      font-weight: 700;
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
+      transition: all .2s;
+      border: none;
+    }
+    .btn-edit-mode.locked {
+      background: rgba(250, 204, 21, .15);
+      border: 1px solid rgba(250, 204, 21, .4);
+      color: #facc15;
+    }
+    .btn-edit-mode.locked:hover {
+      background: rgba(250, 204, 21, .3);
+    }
+    .btn-edit-mode.unlocked {
+      background: #16a34a;
+      border: 1px solid #4ade80;
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(74, 222, 128, .4);
+    }
+    .btn-edit-mode.unlocked:hover {
+      background: #15803d;
     }
 
     .course-actions {
@@ -967,7 +985,7 @@
       <div class="course-selector-group">
         <span class="course-label">📚 선택된 코스:</span>
         <select class="course-select" id="courseSelect"></select>
-        <span class="course-lock-status" id="courseLockBadge" style="display:none">🔒 비밀번호 보호됨</span>
+        <button class="btn-edit-mode locked" id="editModeBtn" style="display:none">🔒 편집 잠김 (클릭하여 1회 해제)</button>
       </div>
       <div class="course-actions">
         <button class="btn-c-action primary" id="newCourseBtn">➕ 새 코스 만들기</button>
@@ -1019,7 +1037,7 @@
     <div class="table-topbar">
       <div class="table-topbar-left">
         <span>현재 코스 등록 수업: <strong id="clsCnt">0</strong>개</span>
-        <span class="drag-hint">💡 과목 카드를 드래그하거나 [▲/▼] 버튼으로 순서를 바꿀 수 있습니다 (동일 과목 수평 자동 정렬)</span>
+        <span class="drag-hint">💡 과목 카드를 드래그하거나 [▲/▼] 버튼으로 순서를 바꿀 수 있습니다</span>
       </div>
       <button class="btn-add" id="openAddBtn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -1220,6 +1238,7 @@
     let courses      = load(LS_COURSES) || [];
     let activeCourseId = load(LS_ACTIVE)  || null;
     let showMY       = load(LS_MY)      || false;
+    let isUnlocked   = false; // Session unlock state: ONCE unlocked, all edits/additions are free!
 
     let filters  = { level: new Set(), type: new Set(), period: new Set() };
     let editId   = null;
@@ -1243,8 +1262,8 @@
         .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // Password Verification Helper (Only triggered on modification/creation/deletion)
-    function verifyCoursePassword(course, actionName = "수정/삭제") {
+    // Single-entry Password Verification helper
+    function verifyCoursePassword(course, actionName = "편집 모드 전환") {
       if (!course || !course.password) return true;
 
       let hint = course.passwordHint || '';
@@ -1252,8 +1271,8 @@
 
       const hintMsg = hint ? `\n💡 힌트: ${hint}` : '';
       const input = prompt(
-        `'${course.name}' 코스는 수정 보호를 위해 비밀번호가 설정되어 있습니다.${hintMsg}\n` +
-        `${actionName}을(를) 진행하려면 비밀번호를 입력하세요:`
+        `'${course.name}' 코스는 수정이 보호되어 있습니다.${hintMsg}\n` +
+        `${actionName}을(를) 위해 비밀번호를 입력하세요:`
       );
 
       if (input === null) return false;
@@ -1272,6 +1291,21 @@
       }
 
       alert(`🔒 비밀번호가 일치하지 않습니다.${hintMsg}`);
+      return false;
+    }
+
+    // 🌟 ONE-TIME UNLOCK CHECKER
+    // Once unlocked for the session, no password prompts will interrupt editing!
+    function ensureUnlocked(actionName = "수정/추가") {
+      const active = getActiveCourse();
+      if (!active || !active.password) return true; // No password set
+      if (isUnlocked) return true; // Already unlocked!
+
+      if (verifyCoursePassword(active, actionName)) {
+        isUnlocked = true;
+        render();
+        return true;
+      }
       return false;
     }
 
@@ -1341,20 +1375,26 @@
       courses.forEach(c => {
         const opt = document.createElement('option');
         opt.value = c.id;
-        const lockIcon = c.password ? '🔒 ' : '';
+        const lockIcon = c.password ? (isUnlocked && c.id === activeCourseId ? '🔓 ' : '🔒 ') : '';
         opt.textContent = `${lockIcon}${c.name} (${c.data ? c.data.length : 0}개 수업)`;
         if (c.id === activeCourseId) opt.selected = true;
         select.appendChild(opt);
       });
 
-      const lockBadge = document.getElementById('courseLockBadge');
+      const editBtn = document.getElementById('editModeBtn');
       if (active && active.password) {
-        lockBadge.style.display = 'inline-flex';
-        let hintMsg = active.passwordHint;
-        if (hintMsg === active.password) hintMsg = '';
-        lockBadge.title = hintMsg ? `힌트: ${hintMsg}` : '수정/삭제 시 비밀번호 필요';
+        editBtn.style.display = 'inline-flex';
+        if (isUnlocked) {
+          editBtn.className = 'btn-edit-mode unlocked';
+          editBtn.textContent = '🔓 편집 진행 중 (클릭하여 잠그기)';
+          editBtn.title = '현재 비밀번호 인증되어 자유롭게 편집 가능합니다. 편집 완료 후 클릭하면 잠깁니다.';
+        } else {
+          editBtn.className = 'btn-edit-mode locked';
+          editBtn.textContent = '🔒 편집 잠김 (클릭하여 1회 해제)';
+          editBtn.title = '수정/추가를 하려면 1회 비밀번호 인증이 필요합니다.';
+        }
       } else {
-        lockBadge.style.display = 'none';
+        editBtn.style.display = 'none';
       }
     }
 
@@ -1458,9 +1498,7 @@
             const active = getActiveCourse();
             if (!active) return;
 
-            if (active.password && !verifyCoursePassword(active, "시간표 순서 변경")) {
-              return;
-            }
+            if (!ensureUnlocked("시간표 순서 변경")) return;
 
             const id = draggedClsId || (e.dataTransfer ? e.dataTransfer.getData('text/plain') : null);
             if (!id) return;
@@ -1580,9 +1618,7 @@
       const active = getActiveCourse();
       if (!active) return;
 
-      if (active.password && !verifyCoursePassword(active, "순서 변경")) {
-        return;
-      }
+      if (!ensureUnlocked("순서 변경")) return;
 
       let cData = active.data || [];
       const idx = cData.findIndex(c => c.id === clsId);
@@ -1684,11 +1720,27 @@
     /* ── COURSE EVENTS ── */
     const courseSelect = document.getElementById('courseSelect');
 
-    // Anyone can view any course without entering a password!
     courseSelect.addEventListener('change', (e) => {
       activeCourseId = e.target.value;
+      isUnlocked = false; // Reset unlock state when switching courses
       save(LS_ACTIVE, activeCourseId);
       render();
+    });
+
+    // Toggle Edit Mode Button
+    document.getElementById('editModeBtn').addEventListener('click', () => {
+      const active = getActiveCourse();
+      if (!active) return;
+
+      if (isUnlocked) {
+        isUnlocked = false;
+        render();
+        alert('🔒 편집 모드가 종료되었습니다. 다시 잠금 상태가 적용되었습니다.');
+      } else {
+        if (ensureUnlocked("편집 모드 전환")) {
+          alert('🔓 편집 모드가 활성화되었습니다. 작성 및 수정 완료 후 [편집 진행 중] 버튼을 눌러 잠그실 수 있습니다.');
+        }
+      }
     });
 
     document.getElementById('newCourseBtn').addEventListener('click', () => {
@@ -1714,6 +1766,7 @@
       };
       courses.push(newCourse);
       activeCourseId = newCourse.id;
+      isUnlocked = true; // Automatically unlock new course for creator
       save(LS_COURSES, courses);
       save(LS_ACTIVE, activeCourseId);
       render();
@@ -1723,9 +1776,7 @@
       const active = getActiveCourse();
       if (!active) return;
 
-      if (active.password && !verifyCoursePassword(active, "비밀번호 설정 변경")) {
-        return;
-      }
+      if (!ensureUnlocked("비밀번호 설정 변경")) return;
 
       const newPwd = prompt('🔒 새로 설정할 비밀번호를 입력하세요:\n(비밀번호를 해제하려면 빈칸으로 두고 확인)');
       if (newPwd === null) return;
@@ -1736,7 +1787,7 @@
       if (trimmedPwd) {
         const hintInput = prompt('💡 비밀번호 힌트를 입력하세요 (선택 사항, 예: 내 생일, 학원 전화번호 등):\n*주의: 비밀번호 자체는 작성하지 마세요*') ?? '';
         newHint = hintInput.trim();
-        if (hint === trimmedPwd) hint = '';
+        if (newHint === trimmedPwd) newHint = '';
       }
 
       active.password = trimmedPwd;
@@ -1750,9 +1801,7 @@
       const active = getActiveCourse();
       if (!active) return;
 
-      if (active.password && !verifyCoursePassword(active, "이름 변경")) {
-        return;
-      }
+      if (!ensureUnlocked("이름 변경")) return;
 
       const newName = prompt('코스 이름을 수정하세요:', active.name);
       if (!newName || !newName.trim()) return;
@@ -1766,9 +1815,7 @@
       const active = getActiveCourse();
       if (!active) return;
 
-      if (active.password && !verifyCoursePassword(active, "코스 복사")) {
-        return;
-      }
+      if (!ensureUnlocked("코스 복사")) return;
 
       const dupCourse = {
         id: 'course_' + uid(),
@@ -1779,6 +1826,7 @@
       };
       courses.push(dupCourse);
       activeCourseId = dupCourse.id;
+      isUnlocked = true;
       save(LS_COURSES, courses);
       save(LS_ACTIVE, activeCourseId);
       render();
@@ -1791,14 +1839,13 @@
       }
       const active = getActiveCourse();
 
-      if (active.password && !verifyCoursePassword(active, "삭제")) {
-        return;
-      }
+      if (!ensureUnlocked("삭제")) return;
 
       if (!confirm(`'${active.name}' 코스를 정말 삭제하시겠습니까?`)) return;
 
       courses = courses.filter(c => c.id !== active.id);
       activeCourseId = courses[0].id;
+      isUnlocked = false;
       save(LS_COURSES, courses);
       save(LS_ACTIVE, activeCourseId);
       render();
@@ -1877,10 +1924,7 @@
 
     /* ── MODAL ── */
     function openModal(id = null, presetSlot = null, presetDay = null) {
-      const active = getActiveCourse();
-      if (active && active.password) {
-        if (!verifyCoursePassword(active, "수업 수정/추가")) return;
-      }
+      if (!ensureUnlocked("수업 수정/추가")) return;
 
       editId    = id;
       pickColor = null;
@@ -1897,6 +1941,7 @@
 
       buildColorPicker();
 
+      const active = getActiveCourse();
       const currentData = active ? active.data || [] : [];
 
       if (id) {
