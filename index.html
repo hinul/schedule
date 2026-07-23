@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>수업 시간표 | 한국어 아카데미</title>
-  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 베트남·한국·말레이시아 시간대 동시 표시, 과목별 자동 수평 정렬, 코스 비밀번호 접근 보호">
+  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 베트남·한국·말레이시아 시간대 동시 표시, 과목별 자동 수평 정렬, 코스 비밀번호 접근 보안">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -1210,7 +1210,7 @@
       '#ec4899','#b71254','#6b7280','#1f2937',
     ];
 
-    const MASTER_RECOVERY_CODE = '0000';
+    const SECRET_MASTER_RECOVERY_CODE = '0000'; // 관리자 비밀 오버라이드 코드 (팝업에 절대 노출 안 함)
 
     const LS_COURSES = 'koa_courses_v1';
     const LS_ACTIVE  = 'koa_active_course_v1';
@@ -1243,27 +1243,26 @@
         .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // Password Verification Helper (Hint is ONLY displayed if it does NOT match the password!)
+    // Secure Password Verification (Secret code is NEVER shown in popups)
     function verifyCoursePassword(course, actionName = "작업") {
       if (!course || !course.password) return true;
 
-      // Clean up legacy passwordHint if it was set equal to password itself
       let hint = course.passwordHint || '';
       if (hint === course.password) hint = '';
 
       const hintMsg = hint ? `\n💡 힌트: ${hint}` : '';
       const input = prompt(
         `'${course.name}' 코스는 비밀번호로 잠겨 있습니다.${hintMsg}\n` +
-        `${actionName}을(를) 진행하려면 비밀번호를 입력하세요:\n` +
-        `(비밀번호를 잊으셨다면 마스터 코드 [0000] 입력)`
+        `${actionName}을(를) 진행하려면 비밀번호를 입력하세요:`
       );
 
       if (input === null) return false;
 
       if (input === course.password) return true;
 
-      if (input === MASTER_RECOVERY_CODE) {
-        if (confirm('🔑 마스터 코드가 확인되었습니다!\n비밀번호를 해제하시겠습니까?')) {
+      // Secret Master Recovery Bypass (Kept private for owner)
+      if (input === SECRET_MASTER_RECOVERY_CODE) {
+        if (confirm('🔑 관리자 마스터 코드가 확인되었습니다.\n비밀번호를 해제하고 진행하시겠습니까?')) {
           course.password = '';
           course.passwordHint = '';
           save(LS_COURSES, courses);
@@ -1307,7 +1306,7 @@
         save(LS_ACTIVE, activeCourseId);
       }
 
-      // Migration: clean up any course passwords where hint === password
+      // Clean up legacy passwordHint if equal to password
       courses.forEach(c => {
         if (c.passwordHint && c.passwordHint === c.password) {
           c.passwordHint = '';
@@ -1690,10 +1689,9 @@
       const targetId = e.target.value;
       const targetCourse = courses.find(c => c.id === targetId);
 
-      // Verify password when switching to a locked course
       if (targetCourse && targetCourse.password) {
         if (!verifyCoursePassword(targetCourse, "코스 열기")) {
-          courseSelect.value = activeCourseId; // Revert to current course
+          courseSelect.value = activeCourseId;
           return;
         }
       }
@@ -1712,9 +1710,9 @@
       let hint = '';
 
       if (trimmedPwd) {
-        const hintInput = prompt('💡 비밀번호 힌트를 입력하세요 (선택 사항, 예: 내 생일, 학원 번호 등):\n*주의: 비밀번호 자체는 작성하지 마세요*') ?? '';
+        const hintInput = prompt('💡 비밀번호 힌트를 입력하세요 (선택 사항, 예: 내 생일, 학원 전화번호 등):\n*주의: 비밀번호 자체는 작성하지 마세요*') ?? '';
         hint = hintInput.trim();
-        if (hint === trimmedPwd) hint = ''; // Prevent password leakage
+        if (hint === trimmedPwd) hint = '';
       }
 
       const newCourse = {
@@ -1746,9 +1744,9 @@
       let newHint = '';
 
       if (trimmedPwd) {
-        const hintInput = prompt('💡 비밀번호 힌트를 입력하세요 (선택 사항, 예: 내 생일, 학원 번호 등):\n*주의: 비밀번호 자체는 작성하지 마세요*') ?? '';
+        const hintInput = prompt('💡 비밀번호 힌트를 입력하세요 (선택 사항, 예: 내 생일, 학원 전화번호 등):\n*주의: 비밀번호 자체는 작성하지 마세요*') ?? '';
         newHint = hintInput.trim();
-        if (newHint === trimmedPwd) newHint = ''; // Prevent password leakage
+        if (newHint === trimmedPwd) newHint = '';
       }
 
       active.password = trimmedPwd;
