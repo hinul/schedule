@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>수업 시간표 | 한국어 아카데미</title>
-  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 베트남·한국·말레이시아 시간대 동시 표시, 급수·유형별 필터 지원, 코스별 프리셋 관리">
+  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 베트남·한국·말레이시아 시간대 동시 표시, 급수·유형별 필터 지원, 코스별 프리셋 관리, 드래그앤드롭 과목 순서 변경">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -384,11 +384,22 @@
       font-size: .88rem;
       color: var(--g500);
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
     .table-topbar-left strong {
       color: var(--primary);
       font-size: 1.05rem;
       font-weight: 800;
+    }
+    .drag-hint {
+      font-size: .75rem;
+      color: var(--g400);
+      background: var(--g100);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 500;
     }
 
     .btn-add {
@@ -517,7 +528,7 @@
       border-right: 1px solid var(--g100);
       position: relative;
       transition: background .15s;
-      min-height: 58px;
+      min-height: 64px;
     }
     .td-day:last-child { border-right: none; }
     .td-day.td-sat { background: #f8faff; }
@@ -525,6 +536,13 @@
     .td-day:hover  { background: #fdf2f7; }
     .td-day.td-sat:hover { background: #eef3ff; }
     .td-day.td-sun:hover { background: #fff0f0; }
+
+    /* Drag target cell style */
+    .td-day.drag-over {
+      background: #fbcfe8 !important;
+      outline: 2px dashed var(--primary);
+      outline-offset: -2px;
+    }
 
     /* Cell add button */
     .cell-add {
@@ -559,15 +577,22 @@
       flex-direction: column;
       padding: 6px 8px;
       border-radius: var(--r-xs);
-      border-left: 3px solid;
-      margin-bottom: 4px;
-      cursor: pointer;
+      border-left: 3.5px solid;
+      margin-bottom: 5px;
+      cursor: grab;
       transition: transform .13s, box-shadow .13s, opacity .2s;
       position: relative;
+      user-select: none;
     }
+    .cls-card:active { cursor: grabbing; }
     .cls-card:last-of-type { margin-bottom: 0; }
-    .cls-card:hover { transform: translateY(-1px); box-shadow: 0 2px 10px rgba(0,0,0,.12); }
+    .cls-card:hover { transform: translateY(-1px); box-shadow: 0 3px 12px rgba(0,0,0,.15); }
     .cls-card.dimmed { opacity: .22; pointer-events: none; }
+    .cls-card.dragging {
+      opacity: .4;
+      transform: scale(.96);
+      box-shadow: 0 8px 20px rgba(0,0,0,.25);
+    }
 
     .card-subj {
       font-weight: 700;
@@ -927,7 +952,8 @@
   <div class="main-wrap">
     <div class="table-topbar">
       <div class="table-topbar-left">
-        현재 코스 등록 수업: <strong id="clsCnt">0</strong>개
+        <span>현재 코스 등록 수업: <strong id="clsCnt">0</strong>개</span>
+        <span class="drag-hint">💡 과목 카드를 마우스로 드래그하여 순서나 요일/시간을 이동할 수 있습니다</span>
       </div>
       <button class="btn-add" id="openAddBtn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -1161,6 +1187,9 @@
           id: 'course_' + uid(),
           name: '기본 코스 A',
           data: oldV2Data && Array.isArray(oldV2Data) ? oldV2Data : [
+            { id: uid(), subject: '초급 읽기', level: '초급', type: '읽기', slotIdxs: [4], days: ['mon'], color: null },
+            { id: uid(), subject: '중급 듣기_전', level: '중급', type: '듣기', slotIdxs: [4], days: ['mon'], color: null },
+            { id: uid(), subject: '중급 읽기_전', level: '중급', type: '읽기', slotIdxs: [4], days: ['mon'], color: null },
             { id: uid(), subject: '초급 듣기', level: '초급', type: '듣기', slotIdxs: [0], days: ['mon','wed','fri'], color: null },
             { id: uid(), subject: '1급 어휘', level: '초급', type: '어휘', slotIdxs: [3], days: ['tue','thu','sat'], color: null }
           ]
@@ -1220,7 +1249,7 @@
       return lv && ty;
     }
 
-    /* ── TABLE RENDER ── */
+    /* ── TABLE RENDER & DRAG-AND-DROP ── */
     function render() {
       const tbody = document.getElementById('schedBody');
       tbody.innerHTML = '';
@@ -1272,12 +1301,68 @@
           td.dataset.day  = day.key;
           td.dataset.slot = slot.i;
 
+          // Drag Over handlers on cell
+          td.addEventListener('dragover', e => {
+            e.preventDefault();
+            td.classList.add('drag-over');
+          });
+
+          td.addEventListener('dragleave', e => {
+            td.classList.remove('drag-over');
+          });
+
+          td.addEventListener('drop', e => {
+            e.preventDefault();
+            td.classList.remove('drag-over');
+
+            const draggedId = e.dataTransfer.getData('text/plain');
+            if (!draggedId) return;
+
+            const targetDay  = td.dataset.day;
+            const targetSlot = parseInt(td.dataset.slot, 10);
+
+            const active = getActiveCourse();
+            let cData = active ? active.data || [] : [];
+            const draggedCls = cData.find(c => c.id === draggedId);
+            if (!draggedCls) return;
+
+            // Find drag placement relative to other cards in target cell
+            const afterElement = getDragAfterElement(td, e.clientY);
+            const targetClsId  = afterElement ? afterElement.dataset.id : null;
+
+            // 1. Update dragged class day & slot if moved to a different cell
+            const curSlots = getSlotsOfClass(draggedCls);
+            if (!draggedCls.days.includes(targetDay) || !curSlots.includes(targetSlot)) {
+              if (!draggedCls.days.includes(targetDay)) {
+                draggedCls.days = [targetDay];
+              }
+              draggedCls.slotIdxs = [targetSlot];
+            }
+
+            // 2. Reorder cData array
+            cData = cData.filter(c => c.id !== draggedId);
+
+            if (targetClsId) {
+              const targetIdx = cData.findIndex(c => c.id === targetClsId);
+              if (targetIdx !== -1) {
+                cData.splice(targetIdx, 0, draggedCls);
+              } else {
+                cData.push(draggedCls);
+              }
+            } else {
+              cData.push(draggedCls);
+            }
+
+            saveCurrentCourseData(cData);
+            render();
+          });
+
           const classes = currentData.filter(c =>
             c.days.includes(day.key) && getSlotsOfClass(c).includes(slot.i)
           );
 
           classes.forEach(cls => {
-            td.appendChild(makeCard(cls));
+            td.appendChild(makeCard(cls, day.key, slot.i));
           });
 
           /* + button */
@@ -1301,12 +1386,31 @@
       renderCourseSelect();
     }
 
-    function makeCard(cls) {
+    // Drag position helper function
+    function getDragAfterElement(container, y) {
+      const draggableElements = [...container.querySelectorAll('.cls-card:not(.dragging)')];
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function makeCard(cls, dayKey, slotIdx) {
       const c = cardStyle(cls);
       const visible = matchesFilter(cls);
 
       const card = document.createElement('div');
       card.className = 'cls-card' + (visible ? '' : ' dimmed');
+      card.draggable = true;
+      card.dataset.id = cls.id;
+      card.dataset.day = dayKey;
+      card.dataset.slot = slotIdx;
+
       card.style.cssText =
         `background:${c.bg};color:${c.txt};border-left-color:${c.brd}`;
 
@@ -1318,7 +1422,25 @@
         <div class="card-subj">${esc(cls.subject)}</div>
         ${tags ? `<div class="card-tags">${tags}</div>` : ''}
       `;
-      card.addEventListener('click', () => openModal(cls.id));
+
+      // Drag events
+      card.addEventListener('dragstart', e => {
+        e.stopPropagation();
+        e.dataTransfer.setData('text/plain', cls.id);
+        card.classList.add('dragging');
+      });
+
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        document.querySelectorAll('.td-day').forEach(td => td.classList.remove('drag-over'));
+      });
+
+      // Click to open modal
+      card.addEventListener('click', e => {
+        e.stopPropagation();
+        openModal(cls.id);
+      });
+
       return card;
     }
 
