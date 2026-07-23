@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>수업 시간표 | 한국어 아카데미</title>
-  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 베트남·한국·말레이시아 시간대 동시 표시, 급수·유형별 필터 지원, 코스별 프리셋 관리, 드래그앤드롭 과목 순서 변경">
+  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 베트남·한국·말레이시아 시간대 동시 표시, 급수·유형별 필터 지원, 코스별 프리셋 관리, 과목 순서 변경(드래그 & 위아래 버튼)">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -387,6 +387,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      flex-wrap: wrap;
     }
     .table-topbar-left strong {
       color: var(--primary);
@@ -395,11 +396,11 @@
     }
     .drag-hint {
       font-size: .75rem;
-      color: var(--g400);
-      background: var(--g100);
-      padding: 2px 8px;
+      color: var(--g500);
+      background: #e2e8f0;
+      padding: 3px 10px;
       border-radius: 12px;
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .btn-add {
@@ -589,9 +590,16 @@
     .cls-card:hover { transform: translateY(-1px); box-shadow: 0 3px 12px rgba(0,0,0,.15); }
     .cls-card.dimmed { opacity: .22; pointer-events: none; }
     .cls-card.dragging {
-      opacity: .4;
-      transform: scale(.96);
+      opacity: .35;
+      transform: scale(.95);
       box-shadow: 0 8px 20px rgba(0,0,0,.25);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 4px;
     }
 
     .card-subj {
@@ -599,7 +607,38 @@
       font-size: .78rem;
       line-height: 1.3;
       margin-bottom: 3px;
+      flex: 1;
     }
+
+    /* Order buttons */
+    .card-order-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      opacity: 0;
+      transition: opacity .15s;
+    }
+    .cls-card:hover .card-order-btns {
+      opacity: 1;
+    }
+    .btn-ord {
+      background: rgba(0,0,0,.08);
+      border: none;
+      border-radius: 3px;
+      color: var(--g700);
+      font-size: .55rem;
+      width: 14px;
+      height: 12px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: background .12s;
+    }
+    .btn-ord:hover { background: rgba(0,0,0,.22); color: #000; }
+
     .card-tags {
       display: flex;
       gap: 3px;
@@ -953,7 +992,7 @@
     <div class="table-topbar">
       <div class="table-topbar-left">
         <span>현재 코스 등록 수업: <strong id="clsCnt">0</strong>개</span>
-        <span class="drag-hint">💡 과목 카드를 마우스로 드래그하여 순서나 요일/시간을 이동할 수 있습니다</span>
+        <span class="drag-hint">💡 과목 카드를 드래그하거나 [▲/▼] 버튼으로 순서를 바꿀 수 있습니다</span>
       </div>
       <button class="btn-add" id="openAddBtn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -1157,6 +1196,9 @@
     let editId   = null;
     let pickColor = null;
 
+    let draggedClsId = null;
+    let isDragging = false;
+
     function load(key) {
       try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
     }
@@ -1249,7 +1291,7 @@
       return lv && ty;
     }
 
-    /* ── TABLE RENDER & DRAG-AND-DROP ── */
+    /* ── TABLE RENDER & DRAG-AND-DROP & REORDER ── */
     function render() {
       const tbody = document.getElementById('schedBody');
       tbody.innerHTML = '';
@@ -1301,36 +1343,41 @@
           td.dataset.day  = day.key;
           td.dataset.slot = slot.i;
 
-          // Drag Over handlers on cell
+          // Cell Drag Over & Drop Handlers
           td.addEventListener('dragover', e => {
             e.preventDefault();
+            if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
             td.classList.add('drag-over');
           });
 
           td.addEventListener('dragleave', e => {
-            td.classList.remove('drag-over');
+            if (!td.contains(e.relatedTarget)) {
+              td.classList.remove('drag-over');
+            }
           });
 
           td.addEventListener('drop', e => {
             e.preventDefault();
             td.classList.remove('drag-over');
 
-            const draggedId = e.dataTransfer.getData('text/plain');
-            if (!draggedId) return;
+            const id = draggedClsId || (e.dataTransfer ? e.dataTransfer.getData('text/plain') : null);
+            if (!id) return;
 
             const targetDay  = td.dataset.day;
             const targetSlot = parseInt(td.dataset.slot, 10);
 
             const active = getActiveCourse();
-            let cData = active ? active.data || [] : [];
-            const draggedCls = cData.find(c => c.id === draggedId);
+            if (!active) return;
+            let cData = active.data || [];
+
+            const draggedCls = cData.find(c => c.id === id);
             if (!draggedCls) return;
 
-            // Find drag placement relative to other cards in target cell
+            // Find placement relative to cards in cell
             const afterElement = getDragAfterElement(td, e.clientY);
             const targetClsId  = afterElement ? afterElement.dataset.id : null;
 
-            // 1. Update dragged class day & slot if moved to a different cell
+            // Update dragged class day & slot if moved to different cell
             const curSlots = getSlotsOfClass(draggedCls);
             if (!draggedCls.days.includes(targetDay) || !curSlots.includes(targetSlot)) {
               if (!draggedCls.days.includes(targetDay)) {
@@ -1339,8 +1386,8 @@
               draggedCls.slotIdxs = [targetSlot];
             }
 
-            // 2. Reorder cData array
-            cData = cData.filter(c => c.id !== draggedId);
+            // Reorder cData array
+            cData = cData.filter(c => c.id !== id);
 
             if (targetClsId) {
               const targetIdx = cData.findIndex(c => c.id === targetClsId);
@@ -1350,19 +1397,27 @@
                 cData.push(draggedCls);
               }
             } else {
-              cData.push(draggedCls);
+              // Append to end of classes in this cell
+              const cellClasses = cData.filter(c => c.days.includes(targetDay) && getSlotsOfClass(c).includes(targetSlot));
+              if (cellClasses.length > 0) {
+                const lastCellCls = cellClasses[cellClasses.length - 1];
+                const lastIdx = cData.findIndex(c => c.id === lastCellCls.id);
+                cData.splice(lastIdx + 1, 0, draggedCls);
+              } else {
+                cData.push(draggedCls);
+              }
             }
 
             saveCurrentCourseData(cData);
             render();
           });
 
-          const classes = currentData.filter(c =>
+          const classesInCell = currentData.filter(c =>
             c.days.includes(day.key) && getSlotsOfClass(c).includes(slot.i)
           );
 
-          classes.forEach(cls => {
-            td.appendChild(makeCard(cls, day.key, slot.i));
+          classesInCell.forEach((cls, cellIdx) => {
+            td.appendChild(makeCard(cls, day.key, slot.i, cellIdx, classesInCell.length));
           });
 
           /* + button */
@@ -1386,7 +1441,7 @@
       renderCourseSelect();
     }
 
-    // Drag position helper function
+    // Helper: find element to insert before based on Y position
     function getDragAfterElement(container, y) {
       const draggableElements = [...container.querySelectorAll('.cls-card:not(.dragging)')];
       return draggableElements.reduce((closest, child) => {
@@ -1400,7 +1455,28 @@
       }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    function makeCard(cls, dayKey, slotIdx) {
+    /* Move class up or down in current cell */
+    function moveClassInCell(clsId, dir) {
+      const active = getActiveCourse();
+      if (!active) return;
+      let cData = active.data || [];
+
+      const idx = cData.findIndex(c => c.id === clsId);
+      if (idx === -1) return;
+
+      const targetIdx = idx + dir;
+      if (targetIdx < 0 || targetIdx >= cData.length) return;
+
+      // Swap
+      const temp = cData[idx];
+      cData[idx] = cData[targetIdx];
+      cData[targetIdx] = temp;
+
+      saveCurrentCourseData(cData);
+      render();
+    }
+
+    function makeCard(cls, dayKey, slotIdx, cellIdx, totalInCell) {
       const c = cardStyle(cls);
       const visible = matchesFilter(cls);
 
@@ -1418,25 +1494,62 @@
       if (cls.level) tags += `<span class="card-tag">${esc(cls.level)}</span>`;
       if (cls.type)  tags += `<span class="card-tag">${esc(cls.type)}</span>`;
 
+      // Build Order buttons if there are multiple cards in this cell
+      let orderBtnsHtml = '';
+      if (totalInCell > 1) {
+        orderBtnsHtml = `
+          <div class="card-order-btns">
+            ${cellIdx > 0 ? `<button class="btn-ord btn-up" title="위로 이동">▲</button>` : ''}
+            ${cellIdx < totalInCell - 1 ? `<button class="btn-ord btn-down" title="아래로 이동">▼</button>` : ''}
+          </div>
+        `;
+      }
+
       card.innerHTML = `
-        <div class="card-subj">${esc(cls.subject)}</div>
+        <div class="card-top">
+          <div class="card-subj">${esc(cls.subject)}</div>
+          ${orderBtnsHtml}
+        </div>
         ${tags ? `<div class="card-tags">${tags}</div>` : ''}
       `;
 
-      // Drag events
+      // Order button click handlers
+      const btnUp = card.querySelector('.btn-up');
+      if (btnUp) {
+        btnUp.addEventListener('click', e => {
+          e.stopPropagation();
+          moveClassInCell(cls.id, -1);
+        });
+      }
+      const btnDown = card.querySelector('.btn-down');
+      if (btnDown) {
+        btnDown.addEventListener('click', e => {
+          e.stopPropagation();
+          moveClassInCell(cls.id, 1);
+        });
+      }
+
+      // Drag Events
       card.addEventListener('dragstart', e => {
         e.stopPropagation();
-        e.dataTransfer.setData('text/plain', cls.id);
+        draggedClsId = cls.id;
+        isDragging = true;
+        if (e.dataTransfer) {
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', cls.id);
+        }
         card.classList.add('dragging');
       });
 
       card.addEventListener('dragend', () => {
         card.classList.remove('dragging');
         document.querySelectorAll('.td-day').forEach(td => td.classList.remove('drag-over'));
+        setTimeout(() => { isDragging = false; draggedClsId = null; }, 100);
       });
 
-      // Click to open modal
+      // Modal click handler (suppressed during drag)
       card.addEventListener('click', e => {
+        if (isDragging) return;
         e.stopPropagation();
         openModal(cls.id);
       });
