@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>수업 시간표 | 한국어 아카데미</title>
-  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 베트남·한국·말레이시아 시간대 동시 표시, 과목별 자동 수평 정렬, 코스 비밀번호 접근 보안">
+  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 자유로운 코스 조회, 과목별 자동 수평 정렬, 수정·삭제 전용 코스 비밀번호 보안">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -1210,7 +1210,7 @@
       '#ec4899','#b71254','#6b7280','#1f2937',
     ];
 
-    const SECRET_MASTER_RECOVERY_CODE = '0000'; // 관리자 비밀 오버라이드 코드 (팝업에 절대 노출 안 함)
+    const SECRET_MASTER_RECOVERY_CODE = '0000';
 
     const LS_COURSES = 'koa_courses_v1';
     const LS_ACTIVE  = 'koa_active_course_v1';
@@ -1243,8 +1243,8 @@
         .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // Secure Password Verification (Secret code is NEVER shown in popups)
-    function verifyCoursePassword(course, actionName = "작업") {
+    // Password Verification Helper (Only triggered on modification/creation/deletion)
+    function verifyCoursePassword(course, actionName = "수정/삭제") {
       if (!course || !course.password) return true;
 
       let hint = course.passwordHint || '';
@@ -1252,7 +1252,7 @@
 
       const hintMsg = hint ? `\n💡 힌트: ${hint}` : '';
       const input = prompt(
-        `'${course.name}' 코스는 비밀번호로 잠겨 있습니다.${hintMsg}\n` +
+        `'${course.name}' 코스는 수정 보호를 위해 비밀번호가 설정되어 있습니다.${hintMsg}\n` +
         `${actionName}을(를) 진행하려면 비밀번호를 입력하세요:`
       );
 
@@ -1260,7 +1260,6 @@
 
       if (input === course.password) return true;
 
-      // Secret Master Recovery Bypass (Kept private for owner)
       if (input === SECRET_MASTER_RECOVERY_CODE) {
         if (confirm('🔑 관리자 마스터 코드가 확인되었습니다.\n비밀번호를 해제하고 진행하시겠습니까?')) {
           course.password = '';
@@ -1353,7 +1352,7 @@
         lockBadge.style.display = 'inline-flex';
         let hintMsg = active.passwordHint;
         if (hintMsg === active.password) hintMsg = '';
-        lockBadge.title = hintMsg ? `힌트: ${hintMsg}` : '비밀번호 설정됨';
+        lockBadge.title = hintMsg ? `힌트: ${hintMsg}` : '수정/삭제 시 비밀번호 필요';
       } else {
         lockBadge.style.display = 'none';
       }
@@ -1685,18 +1684,9 @@
     /* ── COURSE EVENTS ── */
     const courseSelect = document.getElementById('courseSelect');
 
+    // Anyone can view any course without entering a password!
     courseSelect.addEventListener('change', (e) => {
-      const targetId = e.target.value;
-      const targetCourse = courses.find(c => c.id === targetId);
-
-      if (targetCourse && targetCourse.password) {
-        if (!verifyCoursePassword(targetCourse, "코스 열기")) {
-          courseSelect.value = activeCourseId;
-          return;
-        }
-      }
-
-      activeCourseId = targetId;
+      activeCourseId = e.target.value;
       save(LS_ACTIVE, activeCourseId);
       render();
     });
@@ -1746,7 +1736,7 @@
       if (trimmedPwd) {
         const hintInput = prompt('💡 비밀번호 힌트를 입력하세요 (선택 사항, 예: 내 생일, 학원 전화번호 등):\n*주의: 비밀번호 자체는 작성하지 마세요*') ?? '';
         newHint = hintInput.trim();
-        if (newHint === trimmedPwd) newHint = '';
+        if (hint === trimmedPwd) hint = '';
       }
 
       active.password = trimmedPwd;
