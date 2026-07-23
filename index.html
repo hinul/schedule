@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>수업 시간표 | 한국어 아카데미</title>
-  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 베트남·한국·말레이시아 시간대 동시 표시, 과목명 기준 완전 수평 자동 줄맞춤 정렬">
+  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 베트남·한국·말레이시아 시간대 동시 표시, 과목별 자동 수평 정렬, 코스 비밀번호 접근 보호">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -1243,15 +1243,19 @@
         .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // Password Verification Helper
+    // Password Verification Helper (Hint is ONLY displayed if it does NOT match the password!)
     function verifyCoursePassword(course, actionName = "작업") {
-      if (!course.password) return true;
+      if (!course || !course.password) return true;
 
-      const hintText = course.passwordHint ? `\n💡 힌트: ${course.passwordHint}` : '';
+      // Clean up legacy passwordHint if it was set equal to password itself
+      let hint = course.passwordHint || '';
+      if (hint === course.password) hint = '';
+
+      const hintMsg = hint ? `\n💡 힌트: ${hint}` : '';
       const input = prompt(
-        `'${course.name}' 코스는 비밀번호로 보호되어 있습니다.${hintText}\n` +
+        `'${course.name}' 코스는 비밀번호로 잠겨 있습니다.${hintMsg}\n` +
         `${actionName}을(를) 진행하려면 비밀번호를 입력하세요:\n` +
-        `(비밀번호를 잊으셨다면 마스터 코드 [0000]을 입력하세요)`
+        `(비밀번호를 잊으셨다면 마스터 코드 [0000] 입력)`
       );
 
       if (input === null) return false;
@@ -1259,7 +1263,7 @@
       if (input === course.password) return true;
 
       if (input === MASTER_RECOVERY_CODE) {
-        if (confirm('🔑 마스터 코드가 확인되었습니다!\n비밀번호를 해제하고 진행하시겠습니까?')) {
+        if (confirm('🔑 마스터 코드가 확인되었습니다!\n비밀번호를 해제하시겠습니까?')) {
           course.password = '';
           course.passwordHint = '';
           save(LS_COURSES, courses);
@@ -1269,7 +1273,7 @@
         return false;
       }
 
-      alert(`🔒 비밀번호가 일치하지 않습니다.${hintText}\n(마스터 복구 코드는 0000 입니다)`);
+      alert(`🔒 비밀번호가 일치하지 않습니다.${hintMsg}`);
       return false;
     }
 
@@ -1302,6 +1306,14 @@
         save(LS_COURSES, courses);
         save(LS_ACTIVE, activeCourseId);
       }
+
+      // Migration: clean up any course passwords where hint === password
+      courses.forEach(c => {
+        if (c.passwordHint && c.passwordHint === c.password) {
+          c.passwordHint = '';
+        }
+      });
+      save(LS_COURSES, courses);
 
       if (!activeCourseId || !courses.some(c => c.id === activeCourseId)) {
         activeCourseId = courses[0].id;
@@ -1340,7 +1352,9 @@
       const lockBadge = document.getElementById('courseLockBadge');
       if (active && active.password) {
         lockBadge.style.display = 'inline-flex';
-        lockBadge.title = active.passwordHint ? `힌트: ${active.passwordHint}` : '비밀번호 설정됨';
+        let hintMsg = active.passwordHint;
+        if (hintMsg === active.password) hintMsg = '';
+        lockBadge.title = hintMsg ? `힌트: ${hintMsg}` : '비밀번호 설정됨';
       } else {
         lockBadge.style.display = 'none';
       }
@@ -1670,8 +1684,21 @@
     }
 
     /* ── COURSE EVENTS ── */
-    document.getElementById('courseSelect').addEventListener('change', (e) => {
-      activeCourseId = e.target.value;
+    const courseSelect = document.getElementById('courseSelect');
+
+    courseSelect.addEventListener('change', (e) => {
+      const targetId = e.target.value;
+      const targetCourse = courses.find(c => c.id === targetId);
+
+      // Verify password when switching to a locked course
+      if (targetCourse && targetCourse.password) {
+        if (!verifyCoursePassword(targetCourse, "코스 열기")) {
+          courseSelect.value = activeCourseId; // Revert to current course
+          return;
+        }
+      }
+
+      activeCourseId = targetId;
       save(LS_ACTIVE, activeCourseId);
       render();
     });
@@ -1680,17 +1707,21 @@
       const name = prompt('새 코스(시간표 프리셋)의 이름을 입력하세요:', `코스 ${courses.length + 1}`);
       if (!name || !name.trim()) return;
 
-      const pwd = prompt('🔒 코스 보호용 비밀번호를 설정하세요 (선택 사항, 없으면 비워두고 확인):') ?? '';
+      const pwdInput = prompt('🔒 코스 보호용 비밀번호를 설정하세요 (선택 사항, 없으면 비워두고 확인):') ?? '';
+      const trimmedPwd = pwdInput.trim();
       let hint = '';
-      if (pwd.trim()) {
-        hint = prompt('💡 비밀번호 힌트를 설정하세요 (선택 사항, 잊어버렸을 때 도움이 됩니다):') ?? '';
+
+      if (trimmedPwd) {
+        const hintInput = prompt('💡 비밀번호 힌트를 입력하세요 (선택 사항, 예: 내 생일, 학원 번호 등):\n*주의: 비밀번호 자체는 작성하지 마세요*') ?? '';
+        hint = hintInput.trim();
+        if (hint === trimmedPwd) hint = ''; // Prevent password leakage
       }
 
       const newCourse = {
         id: 'course_' + uid(),
         name: name.trim(),
-        password: pwd.trim(),
-        passwordHint: hint.trim(),
+        password: trimmedPwd,
+        passwordHint: hint,
         data: []
       };
       courses.push(newCourse);
@@ -1708,16 +1739,20 @@
         return;
       }
 
-      const newPwd = prompt('🔒 새 비밀번호를 입력하세요 (비밀번호를 해제하려면 빈칸으로 확인):');
+      const newPwd = prompt('🔒 새로 설정할 비밀번호를 입력하세요:\n(비밀번호를 해제하려면 빈칸으로 두고 확인)');
       if (newPwd === null) return;
 
+      const trimmedPwd = newPwd.trim();
       let newHint = '';
-      if (newPwd.trim()) {
-        newHint = prompt('💡 비밀번호 힌트를 입력하세요 (선택 사항):') ?? '';
+
+      if (trimmedPwd) {
+        const hintInput = prompt('💡 비밀번호 힌트를 입력하세요 (선택 사항, 예: 내 생일, 학원 번호 등):\n*주의: 비밀번호 자체는 작성하지 마세요*') ?? '';
+        newHint = hintInput.trim();
+        if (newHint === trimmedPwd) newHint = ''; // Prevent password leakage
       }
 
-      active.password = newPwd.trim();
-      active.passwordHint = newHint.trim();
+      active.password = trimmedPwd;
+      active.passwordHint = newHint;
       save(LS_COURSES, courses);
       alert(active.password ? '🔒 비밀번호가 성공적으로 설정되었습니다.' : '🔓 비밀번호 보호가 해제되었습니다.');
       render();
@@ -1768,7 +1803,6 @@
       }
       const active = getActiveCourse();
 
-      // Verify password if course is locked
       if (active.password && !verifyCoursePassword(active, "삭제")) {
         return;
       }
