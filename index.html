@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>수업 시간표 | 한국어 아카데미</title>
-  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 베트남·한국·말레이시아 시간대 동시 표시, 급수·유형별 필터 지원, 과목별 자동 줄맞춤(수평 정렬), 코스 비밀번호 & 힌트">
+  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 베트남·한국·말레이시아 시간대 동시 표시, 과목명 기준 완전 수평 자동 줄맞춤 정렬">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -1019,7 +1019,7 @@
     <div class="table-topbar">
       <div class="table-topbar-left">
         <span>현재 코스 등록 수업: <strong id="clsCnt">0</strong>개</span>
-        <span class="drag-hint">💡 과목 카드를 드래그하거나 [▲/▼] 버튼으로 순서를 바꿀 수 있습니다 (같은 과목 수평 자동 정렬)</span>
+        <span class="drag-hint">💡 과목 카드를 드래그하거나 [▲/▼] 버튼으로 순서를 바꿀 수 있습니다 (동일 과목 수평 자동 정렬)</span>
       </div>
       <button class="btn-add" id="openAddBtn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -1363,7 +1363,7 @@
       return lv && ty;
     }
 
-    /* ── TABLE RENDER & HORIZONTAL ALIGNMENT ── */
+    /* ── TABLE RENDER & SUBJECT-BASED HORIZONTAL ALIGNMENT ── */
     function render() {
       const tbody = document.getElementById('schedBody');
       tbody.innerHTML = '';
@@ -1407,12 +1407,13 @@
         `;
         tr.appendChild(ttd);
 
-        /* Collect distinct classes present in this time slot across ALL days for sub-row alignment */
-        const slotClasses = [];
+        /* Collect distinct SUBJECT NAMES in this time slot across ALL days for strict sub-row alignment */
+        const slotSubjectKeys = [];
         currentData.forEach(c => {
           if (getSlotsOfClass(c).includes(slot.i)) {
-            if (!slotClasses.some(existing => existing.id === c.id)) {
-              slotClasses.push(c);
+            const key = (c.subject || '').trim();
+            if (key && !slotSubjectKeys.includes(key)) {
+              slotSubjectKeys.push(key);
             }
           }
         });
@@ -1499,21 +1500,21 @@
             c.days.includes(day.key) && getSlotsOfClass(c).includes(slot.i)
           );
 
-          if (slotClasses.length > 1 && dayClasses.length > 0) {
+          if (slotSubjectKeys.length > 1 && dayClasses.length > 0) {
             // Find highest sub-row index required for this day
-            let maxSubRowIndex = -1;
-            slotClasses.forEach((sc, subIdx) => {
-              if (dayClasses.some(dc => dc.id === sc.id)) {
-                maxSubRowIndex = subIdx;
+            let maxSubRowIdx = -1;
+            slotSubjectKeys.forEach((subjKey, subIdx) => {
+              if (dayClasses.some(dc => (dc.subject || '').trim() === subjKey)) {
+                maxSubRowIdx = subIdx;
               }
             });
 
-            slotClasses.forEach((sc, subIdx) => {
-              if (subIdx > maxSubRowIndex) return;
+            slotSubjectKeys.forEach((subjKey, subIdx) => {
+              if (subIdx > maxSubRowIdx) return;
 
-              const cls = dayClasses.find(dc => dc.id === sc.id);
+              const cls = dayClasses.find(dc => (dc.subject || '').trim() === subjKey);
               if (cls) {
-                td.appendChild(makeCard(cls, day.key, slot.i, subIdx, slotClasses.length));
+                td.appendChild(makeCard(cls, day.key, slot.i, subIdx, slotSubjectKeys.length));
               } else {
                 // Empty spacer card for horizontal alignment across days
                 const ph = document.createElement('div');
