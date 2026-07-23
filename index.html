@@ -617,7 +617,7 @@
       border-radius: var(--r);
       box-shadow: var(--shadow-lg);
       width: 100%;
-      max-width: 500px;
+      max-width: 540px;
       max-height: 92vh;
       display: flex;
       flex-direction: column;
@@ -689,20 +689,6 @@
     .form-input:focus { border-color: var(--primary); }
     .form-input.err   { border-color: #ef4444; }
 
-    .form-select {
-      width: 100%;
-      padding: 9px 12px;
-      border: 1.5px solid var(--g300);
-      border-radius: var(--r-sm);
-      font-size: .9rem;
-      color: var(--g800);
-      background: var(--white);
-      outline: none;
-      cursor: pointer;
-      transition: border-color .18s;
-    }
-    .form-select:focus { border-color: var(--primary); }
-
     /* Chip radio/checkbox */
     .chip-row {
       display: flex;
@@ -729,6 +715,55 @@
       background: var(--primary);
       border-color: var(--primary);
       color: #fff;
+    }
+
+    /* Time slot group chips */
+    .slot-group-box {
+      background: var(--g50);
+      border: 1px solid var(--g200);
+      border-radius: var(--r-sm);
+      padding: 10px 12px;
+      margin-bottom: 8px;
+    }
+    .slot-group-box:last-child { margin-bottom: 0; }
+    .slot-group-title {
+      font-size: .75rem;
+      font-weight: 800;
+      color: var(--g600);
+      margin-bottom: 6px;
+    }
+    .slot-chip-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .slot-chip-row input { display: none; }
+    .slot-chip-row label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: .78rem;
+      font-weight: 600;
+      border: 1.5px solid var(--g300);
+      background: var(--white);
+      color: var(--g700);
+      cursor: pointer;
+      transition: all .16s;
+      user-select: none;
+    }
+    .slot-chip-row label:hover { border-color: var(--primary); color: var(--primary); }
+    .slot-chip-row input:checked + label {
+      background: var(--primary-lt);
+      border-color: var(--primary);
+      color: var(--primary-dk);
+      font-weight: 700;
+    }
+    .slot-tz-hint {
+      font-size: .7rem;
+      color: var(--g500);
+      font-weight: 500;
     }
 
     /* Day chips */
@@ -965,26 +1000,51 @@
           </div>
         </div>
 
-        <!-- 시간 슬롯 -->
+        <!-- 시간 슬롯 (복수 선택 체크박스) -->
         <div class="form-row">
-          <label class="form-label" for="slotSel">시간대 <em>베트남 기준</em></label>
-          <select class="form-select" id="slotSel">
-            <optgroup label="☀️ 오전">
-              <option value="0">오전  09:00~10:00 (VN) ／ 11:00~12:00 (KR) ／ 10:00~11:00 (MY)</option>
-              <option value="1">오전  10:00~11:00 (VN) ／ 12:00~13:00 (KR) ／ 11:00~12:00 (MY)</option>
-              <option value="2">오전  11:00~12:00 (VN) ／ 13:00~14:00 (KR) ／ 12:00~13:00 (MY)</option>
-            </optgroup>
-            <optgroup label="🌤 오후">
-              <option value="3">오후  14:00~15:00 (VN) ／ 16:00~17:00 (KR) ／ 15:00~16:00 (MY)</option>
-              <option value="4">오후  15:00~16:00 (VN) ／ 17:00~18:00 (KR) ／ 16:00~17:00 (MY)</option>
-              <option value="5">오후  16:00~17:00 (VN) ／ 18:00~19:00 (KR) ／ 17:00~18:00 (MY)</option>
-            </optgroup>
-            <optgroup label="🌙 저녁">
-              <option value="6">저녁  19:00~20:00 (VN) ／ 21:00~22:00 (KR) ／ 20:00~21:00 (MY)</option>
-              <option value="7">저녁  20:00~21:00 (VN) ／ 22:00~23:00 (KR) ／ 21:00~22:00 (MY)</option>
-              <option value="8">저녁  21:00~22:00 (VN) ／ 23:00~00:00 (KR) ／ 22:00~23:00 (MY)</option>
-            </optgroup>
-          </select>
+          <label class="form-label">시간대 선택 <em>복수 선택 가능 (VN 기준)</em></label>
+          
+          <div class="slot-group-box">
+            <div class="slot-group-title">☀️ 오전</div>
+            <div class="slot-chip-row">
+              <input type="checkbox" name="slot" id="slot-0" value="0">
+              <label for="slot-0"><span>09:00 ~ 10:00</span> <span class="slot-tz-hint">KR 11:00 / MY 10:00</span></label>
+              
+              <input type="checkbox" name="slot" id="slot-1" value="1">
+              <label for="slot-1"><span>10:00 ~ 11:00</span> <span class="slot-tz-hint">KR 12:00 / MY 11:00</span></label>
+
+              <input type="checkbox" name="slot" id="slot-2" value="2">
+              <label for="slot-2"><span>11:00 ~ 12:00</span> <span class="slot-tz-hint">KR 13:00 / MY 12:00</span></label>
+            </div>
+          </div>
+
+          <div class="slot-group-box">
+            <div class="slot-group-title">🌤 오후</div>
+            <div class="slot-chip-row">
+              <input type="checkbox" name="slot" id="slot-3" value="3">
+              <label for="slot-3"><span>14:00 ~ 15:00</span> <span class="slot-tz-hint">KR 16:00 / MY 15:00</span></label>
+
+              <input type="checkbox" name="slot" id="slot-4" value="4">
+              <label for="slot-4"><span>15:00 ~ 16:00</span> <span class="slot-tz-hint">KR 17:00 / MY 16:00</span></label>
+
+              <input type="checkbox" name="slot" id="slot-5" value="5">
+              <label for="slot-5"><span>16:00 ~ 17:00</span> <span class="slot-tz-hint">KR 18:00 / MY 17:00</span></label>
+            </div>
+          </div>
+
+          <div class="slot-group-box">
+            <div class="slot-group-title">🌙 저녁</div>
+            <div class="slot-chip-row">
+              <input type="checkbox" name="slot" id="slot-6" value="6">
+              <label for="slot-6"><span>19:00 ~ 20:00</span> <span class="slot-tz-hint">KR 21:00 / MY 20:00</span></label>
+
+              <input type="checkbox" name="slot" id="slot-7" value="7">
+              <label for="slot-7"><span>20:00 ~ 21:00</span> <span class="slot-tz-hint">KR 22:00 / MY 21:00</span></label>
+
+              <input type="checkbox" name="slot" id="slot-8" value="8">
+              <label for="slot-8"><span>21:00 ~ 22:00</span> <span class="slot-tz-hint">KR 23:00 / MY 22:00</span></label>
+            </div>
+          </div>
         </div>
 
         <!-- 요일 -->
@@ -1086,6 +1146,13 @@
         .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
+    // Helper: normalize slot indices to array
+    function getSlotsOfClass(cls) {
+      if (Array.isArray(cls.slotIdxs)) return cls.slotIdxs;
+      if (typeof cls.slotIdx === 'number') return [cls.slotIdx];
+      return [];
+    }
+
     /* ── COURSE MANAGEMENT INITIALIZATION ── */
     function initCourses() {
       const oldV2Data = load('koa_sched_v2');
@@ -1094,8 +1161,8 @@
           id: 'course_' + uid(),
           name: '기본 코스 A',
           data: oldV2Data && Array.isArray(oldV2Data) ? oldV2Data : [
-            { id: uid(), subject: '초급 듣기', level: '초급', type: '듣기', slotIdx: 0, days: ['mon','wed','fri'], color: null },
-            { id: uid(), subject: '1급 어휘', level: '초급', type: '어휘', slotIdx: 3, days: ['tue','thu','sat'], color: null }
+            { id: uid(), subject: '초급 듣기', level: '초급', type: '듣기', slotIdxs: [0], days: ['mon','wed','fri'], color: null },
+            { id: uid(), subject: '1급 어휘', level: '초급', type: '어휘', slotIdxs: [3], days: ['tue','thu','sat'], color: null }
           ]
         };
         courses.push(defaultCourse);
@@ -1206,7 +1273,7 @@
           td.dataset.slot = slot.i;
 
           const classes = currentData.filter(c =>
-            c.days.includes(day.key) && c.slotIdx === slot.i
+            c.days.includes(day.key) && getSlotsOfClass(c).includes(slot.i)
           );
 
           classes.forEach(cls => {
@@ -1401,10 +1468,10 @@
       document.getElementById('subjectInput').classList.remove('err');
       document.querySelectorAll('[name="level"]').forEach(r => r.checked = false);
       document.querySelectorAll('[name="type"]').forEach(r  => r.checked = false);
+      document.querySelectorAll('[name="slot"]').forEach(c  => c.checked = false);
       document.querySelectorAll('[name="day"]').forEach(c   => c.checked = false);
       document.getElementById('lvCustom').style.display = 'none';
       document.getElementById('lvCustom').value = '';
-      document.getElementById('slotSel').value = '0';
 
       buildColorPicker();
 
@@ -1417,7 +1484,12 @@
         if (!cls) return;
 
         document.getElementById('subjectInput').value = cls.subject || '';
-        document.getElementById('slotSel').value = cls.slotIdx;
+
+        const slotIdxs = getSlotsOfClass(cls);
+        slotIdxs.forEach(sIdx => {
+          const cb = document.querySelector(`[name="slot"][value="${sIdx}"]`);
+          if (cb) cb.checked = true;
+        });
 
         const STD = ['초급','중급','고급'];
         if (STD.includes(cls.level)) {
@@ -1447,7 +1519,10 @@
         document.getElementById('modalTitle').textContent  = '수업 수정';
       } else {
         /* Add mode */
-        if (presetSlot !== null) document.getElementById('slotSel').value = presetSlot;
+        if (presetSlot !== null) {
+          const cb = document.querySelector(`[name="slot"][value="${presetSlot}"]`);
+          if (cb) cb.checked = true;
+        }
         if (presetDay) {
           const cb = document.querySelector(`[name="day"][value="${presetDay}"]`);
           if (cb) cb.checked = true;
@@ -1491,6 +1566,18 @@
         return;
       }
 
+      const slotIdxs = [...document.querySelectorAll('[name="slot"]:checked')].map(c => parseInt(c.value, 10));
+      if (slotIdxs.length === 0) {
+        alert('시간대를 하나 이상 선택해주세요.');
+        return;
+      }
+
+      const days = [...document.querySelectorAll('[name="day"]:checked')].map(c => c.value);
+      if (days.length === 0) {
+        alert('요일을 하나 이상 선택해주세요.');
+        return;
+      }
+
       const lvRadio = document.querySelector('[name="level"]:checked');
       let level = '';
       if (lvRadio) {
@@ -1502,18 +1589,10 @@
       const tyRadio = document.querySelector('[name="type"]:checked');
       const type = tyRadio ? tyRadio.value : '';
 
-      const slotIdx = parseInt(document.getElementById('slotSel').value, 10);
-
-      const days = [...document.querySelectorAll('[name="day"]:checked')].map(c => c.value);
-      if (days.length === 0) {
-        alert('요일을 하나 이상 선택해주세요.');
-        return;
-      }
-
       const active = getActiveCourse();
       let currentData = active ? active.data || [] : [];
 
-      const entry = { subject: subj, level, type, slotIdx, days, color: pickColor };
+      const entry = { subject: subj, level, type, slotIdxs, days, color: pickColor };
 
       if (editId) {
         const idx = currentData.findIndex(c => c.id === editId);
