@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>수업 시간표 | 한국어 아카데미</title>
-  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 24+ 풍부한 컬러 팔레트 & 사용자 지정 커스텀 색상 피커 지원">
+  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 24+ 풍부한 컬러 팔레트, JSON 파일 백업 및 불러오기 지원">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -316,6 +316,9 @@
     .btn-c-action.primary:hover { background: #0369a1; }
     .btn-c-action.danger { background: rgba(239, 68, 68, .2); border-color: rgba(239, 68, 68, .4); color: #fca5a5; }
     .btn-c-action.danger:hover { background: rgba(239, 68, 68, .4); color: #fff; }
+
+    /* Hidden file input for json import */
+    #importFileInput { display: none; }
 
     /* ====================================================
        FILTER BAR
@@ -1023,6 +1026,9 @@
         <button class="btn-c-action" id="pwdCourseBtn">🔒 비번 설정/변경</button>
         <button class="btn-c-action" id="renameCourseBtn">✏️ 코스 이름 변경</button>
         <button class="btn-c-action" id="dupCourseBtn">📋 코스 복사</button>
+        <button class="btn-c-action" id="exportBtn" title="시간표 백업 파일(.json) 저장">📤 시간표 백업</button>
+        <button class="btn-c-action" id="importBtn" title="시간표 백업 파일(.json) 불러오기">📥 불러오기</button>
+        <input type="file" id="importFileInput" accept=".json">
         <button class="btn-c-action danger" id="delCourseBtn">🗑️ 코스 삭제</button>
       </div>
     </div>
@@ -1859,6 +1865,63 @@
       save(LS_COURSES, courses);
       save(LS_ACTIVE, activeCourseId);
       render();
+    });
+
+    /* ── EXPORT & IMPORT (JSON BACKUP & SHARE) ── */
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const exportData = {
+        version: 'koa_v1',
+        exportedAt: new Date().toISOString(),
+        courses: courses
+      };
+      const jsonStr = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `korean_academy_schedule_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('importBtn').addEventListener('click', () => {
+      document.getElementById('importFileInput').click();
+    });
+
+    document.getElementById('importFileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          if (imported && Array.isArray(imported.courses) && imported.courses.length > 0) {
+            courses = imported.courses;
+            activeCourseId = courses[0].id;
+            isUnlocked = false;
+            save(LS_COURSES, courses);
+            save(LS_ACTIVE, activeCourseId);
+            render();
+            alert('📥 시간표 데이터를 성공적으로 불러왔습니다!');
+          } else if (Array.isArray(imported)) {
+            // direct array format
+            courses = imported;
+            activeCourseId = courses[0].id;
+            isUnlocked = false;
+            save(LS_COURSES, courses);
+            save(LS_ACTIVE, activeCourseId);
+            render();
+            alert('📥 시간표 데이터를 성공적으로 불러왔습니다!');
+          } else {
+            alert('⚠️ 올바르지 않은 시간표 파일 형식입니다.');
+          }
+        } catch (err) {
+          alert('⚠️ 파일을 읽는 중 오류가 발생했습니다: ' + err.message);
+        }
+        e.target.value = '';
+      };
+      reader.readAsText(file);
     });
 
     document.getElementById('delCourseBtn').addEventListener('click', () => {
