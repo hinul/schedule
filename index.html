@@ -4,309 +4,1554 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>수업 시간표 | 한국어 아카데미</title>
-  <meta name="description" content="한국어 아카데미 주간 수업 시간표 - 초급, 중급, 고급 듣기/읽기 수업 안내">
+  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 베트남·한국·말레이시아 시간대 동시 표시, 급수·유형별 필터 지원, 코스별 프리셋 관리">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --primary:#b71254;--primary-dk:#8e0d3f;--primary-lt:#f9e4ee;
-      --bg:#f7f8fc;--white:#fff;
-      --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;
-      --gray-400:#9ca3af;--gray-600:#4b5563;--gray-800:#1f2937;
-      --shadow-sm:0 1px 3px rgba(0,0,0,.08);
-      --shadow-md:0 4px 16px rgba(0,0,0,.10);
-      --radius:12px;
+    /* ====================================================
+       RESET & TOKENS
+    ==================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:     #b71254;
+      --primary-dk:  #8e0d3f;
+      --primary-lt:  #f9e4ee;
+      --primary-mid: #e8106a;
+      --vn:  #dc2626;
+      --vn-bg: #fee2e2;
+      --kr:  #1d4ed8;
+      --kr-bg: #dbeafe;
+      --my:  #16a34a;
+      --my-bg: #dcfce7;
+      --bg:       #f4f5fb;
+      --white:    #ffffff;
+      --g50:  #f9fafb;
+      --g100: #f3f4f6;
+      --g200: #e5e7eb;
+      --g300: #d1d5db;
+      --g400: #9ca3af;
+      --g500: #6b7280;
+      --g600: #4b5563;
+      --g700: #374151;
+      --g800: #1f2937;
+      --g900: #111827;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.10);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,.16);
+      --r:    12px;
+      --r-sm: 8px;
+      --r-xs: 6px;
+      /* type colors */
+      --c-listen:  #3b82f6;
+      --c-read:    #10b981;
+      --c-write:   #f59e0b;
+      --c-vocab:   #8b5cf6;
+      --c-grammar: #ef4444;
     }
-    html{scroll-behavior:smooth}
-    body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--gray-800);min-height:100vh}
-    header{background:var(--white);box-shadow:var(--shadow-sm);position:sticky;top:0;z-index:100}
-    .header-inner{max-width:1100px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between}
-    .logo{font-family:'Montserrat','Noto Sans KR',sans-serif;font-size:1.2rem;font-weight:700;color:var(--primary);letter-spacing:-.02em;text-decoration:none}
-    .logo span{color:var(--gray-800)}
-    .header-badge{background:var(--primary);color:#fff;font-size:.72rem;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:.05em}
-    .hero{background:linear-gradient(135deg,var(--primary-dk) 0%,var(--primary) 60%,#e84393 100%);color:#fff;padding:56px 24px 48px;text-align:center;position:relative;overflow:hidden}
-    .hero-label{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(8px);padding:5px 18px;border-radius:20px;font-size:.78rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px}
-    .hero h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:900;line-height:1.25;margin-bottom:12px;letter-spacing:-.03em;animation:fadeUp .35s ease both}
-    .hero p{font-size:.95rem;opacity:.88;font-weight:300;animation:fadeUp .45s ease both}
-    .legend-bar{background:var(--white);border-bottom:1px solid var(--gray-200)}
-    .legend-inner{max-width:1100px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;flex-wrap:wrap;gap:10px 20px}
-    .legend-title{font-size:.75rem;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase}
-    .legend-item{display:flex;align-items:center;gap:6px;font-size:.8rem;font-weight:500;color:var(--gray-600);padding:3px 10px;border-radius:20px}
-    .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-    .filter-section{max-width:1100px;margin:28px auto 0;padding:0 24px}
-    .filter-groups{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
-    .filter-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .filter-group-label{font-size:.72rem;font-weight:800;color:var(--gray-400);letter-spacing:.1em;text-transform:uppercase;min-width:52px;padding-right:4px;white-space:nowrap}
-    .filter-divider{width:1px;height:20px;background:var(--gray-200);flex-shrink:0}
-    .tab-btn{padding:7px 18px;border:1.5px solid var(--gray-200);background:var(--white);border-radius:24px;font-size:.82rem;font-weight:600;color:var(--gray-600);cursor:pointer;transition:all .18s;font-family:inherit}
-    .tab-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-lt)}
-    .tab-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(183,18,84,.25)}
-    .tab-btn[data-group="type"].active{background:#6d28d9;border-color:#6d28d9;box-shadow:0 2px 8px rgba(109,40,217,.25)}
-    .tab-btn[data-group="type"]:hover{border-color:#6d28d9;color:#6d28d9;background:#ede9fe}
-    .tab-btn[data-group="level"].active{background:#065f46;border-color:#065f46;box-shadow:0 2px 8px rgba(6,95,70,.25)}
-    .tab-btn[data-group="level"]:hover{border-color:#065f46;color:#065f46;background:#d1fae5}
-    .active-filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:24px;margin-bottom:4px;padding:0 2px}
-    .active-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 12px;border-radius:20px;font-size:.75rem;font-weight:700;cursor:pointer;transition:opacity .15s}
-    .active-chip.chip-type{background:#ede9fe;color:#6d28d9;border:1px solid #ddd6fe}
-    .active-chip.chip-level{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
-    .active-chip.chip-period{background:var(--primary-lt);color:var(--primary);border:1px solid #f4b8d0}
-    .active-chip:hover{opacity:.75}
-    .chip-x{font-size:.8rem;line-height:1}
-    .no-result{text-align:center;padding:40px 0;color:var(--gray-400);font-size:.9rem}
-    .table-section{max-width:1100px;margin:0 auto 60px;padding:0 24px}
-    .table-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-md);overflow:hidden;border:1px solid var(--gray-200);animation:fadeUp .4s ease both}
-    .table-scroll{overflow-x:auto}
-    table.schedule{width:100%;border-collapse:collapse;font-size:.84rem;min-width:640px}
-    table.schedule thead tr{background:linear-gradient(135deg,var(--primary-dk),var(--primary));color:#fff}
-    table.schedule thead th{padding:14px 10px;font-weight:700;letter-spacing:.04em;text-align:center;font-size:.82rem}
-    table.schedule thead th:first-child{width:60px}
-    table.schedule thead th:nth-child(2){width:80px}
-    .period-cell{background:var(--gray-50);border-right:2px solid var(--gray-200);text-align:center;font-weight:800;font-size:.75rem;color:var(--primary);padding:0 6px;vertical-align:middle;letter-spacing:.06em;white-space:nowrap}
-    .time-cell{text-align:center;font-variant-numeric:tabular-nums;font-size:.8rem;font-weight:600;color:var(--gray-600);padding:10px 8px;border-right:1px solid var(--gray-200);white-space:nowrap;background:var(--gray-50);vertical-align:middle}
-    table.schedule tbody tr{border-bottom:1px solid var(--gray-200);transition:background .14s}
-    table.schedule tbody tr:last-child{border-bottom:none}
-    table.schedule tbody tr:hover td{background:#fdf2f7!important}
-    table.schedule tbody tr:hover .period-cell,table.schedule tbody tr:hover .time-cell{background:var(--primary-lt)!important}
-    .class-cell{padding:10px 8px;vertical-align:middle;text-align:center;border-right:1px solid var(--gray-200)}
-    .class-cell:last-child{border-right:none}
-    .class-pair{display:flex;flex-direction:column;gap:5px;align-items:center}
-    .class-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:.75rem;font-weight:600;white-space:nowrap;transition:transform .15s,box-shadow .15s;cursor:default}
-    .class-tag:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
-    .tag-초급-듣기{background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe}
-    .tag-초급-읽기{background:#ede9fe;color:#6d28d9;border:1px solid #ddd6fe}
-    .tag-중급-듣기{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
-    .tag-중급-읽기{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
-    .tag-고급-듣기{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
-    .tag-고급-읽기{background:#fce7f3;color:#9d174d;border:1px solid #fbcfe8}
-    .empty-cell{color:var(--gray-400);font-size:.75rem}
-    .class-tag.dimmed{opacity:.12;filter:grayscale(1)}
-    td.class-cell.all-dimmed{opacity:.3}
-    tr.section-row td{background:linear-gradient(90deg,var(--primary-lt),var(--white));padding:7px 16px;font-size:.72rem;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:.14em;border-bottom:1px solid var(--primary-lt)}
-    footer{background:var(--gray-800);color:var(--gray-400);text-align:center;padding:28px 16px;font-size:.78rem}
-    footer strong{color:var(--white)}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-    @media(max-width:768px){.header-badge{display:none}.hero{padding:40px 16px 36px}.filter-section,.table-section{padding:0 12px}.legend-inner{padding:12px 16px}}
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--g800);
+      min-height: 100vh;
+    }
+
+    button, input, select { font-family: inherit; }
+
+    /* ====================================================
+       HEADER
+    ==================================================== */
+    header {
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 28px;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .logo {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.18rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-decoration: none;
+      letter-spacing: -.02em;
+      white-space: nowrap;
+    }
+    .logo em { font-style: normal; color: var(--g800); }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* MY toggle */
+    .tz-toggle {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .tz-toggle input { display: none; }
+
+    .toggle-track {
+      width: 42px;
+      height: 22px;
+      background: var(--g300);
+      border-radius: 11px;
+      position: relative;
+      transition: background .25s;
+      flex-shrink: 0;
+    }
+    .toggle-thumb {
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 18px; height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(0,0,0,.2);
+      transition: transform .25s;
+    }
+    .tz-toggle input:checked ~ .toggle-track { background: var(--my); }
+    .tz-toggle input:checked ~ .toggle-track .toggle-thumb { transform: translateX(20px); }
+
+    .toggle-label {
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--g500);
+      transition: color .2s;
+    }
+    .tz-toggle:hover .toggle-label { color: var(--my); }
+    .tz-toggle input:checked ~ .toggle-label { color: var(--my); }
+
+    /* ====================================================
+       HERO
+    ==================================================== */
+    .hero {
+      background: linear-gradient(135deg, var(--primary-dk) 0%, var(--primary) 55%, #e84393 100%);
+      color: #fff;
+      padding: 40px 28px 34px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.06);
+      top: -120px; right: -80px;
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.04);
+      bottom: -80px; left: -60px;
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.3);
+      backdrop-filter: blur(8px);
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+      letter-spacing: -.02em;
+    }
+    .hero-sub {
+      font-size: .9rem;
+      opacity: .82;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .hero-tz {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255,255,255,.15);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: .78rem;
+      font-weight: 600;
+    }
+
+    /* ====================================================
+       COURSE CONTROL BAR
+    ==================================================== */
+    .course-bar-wrap {
+      background: #1e293b;
+      color: #fff;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    .course-bar {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 10px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .course-selector-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .course-label {
+      font-size: .83rem;
+      font-weight: 700;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+    .course-select {
+      background: #0f172a;
+      color: #f8fafc;
+      border: 1.5px solid #334155;
+      padding: 6px 32px 6px 14px;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      outline: none;
+      transition: border-color .18s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+    .course-select:focus { border-color: #38bdf8; }
+
+    .course-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-c-action {
+      background: rgba(255,255,255,.08);
+      color: #e2e8f0;
+      border: 1px solid rgba(255,255,255,.18);
+      padding: 5px 13px;
+      border-radius: 6px;
+      font-size: .78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .16s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-c-action:hover { background: rgba(255,255,255,.18); color: #fff; }
+    .btn-c-action.primary { background: #0284c7; border-color: #38bdf8; color: #fff; }
+    .btn-c-action.primary:hover { background: #0369a1; }
+    .btn-c-action.danger { background: rgba(239, 68, 68, .2); border-color: rgba(239, 68, 68, .4); color: #fca5a5; }
+    .btn-c-action.danger:hover { background: rgba(239, 68, 68, .4); color: #fff; }
+
+    /* ====================================================
+       FILTER BAR
+    ==================================================== */
+    .filter-bar-wrap {
+      background: var(--white);
+      border-bottom: 1px solid var(--g200);
+      position: sticky;
+      top: 62px;
+      z-index: 150;
+    }
+    .filter-bar {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 11px 28px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 14px;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-group-label {
+      font-size: .72rem;
+      font-weight: 800;
+      color: var(--g400);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .f-chip {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: .78rem;
+      font-weight: 600;
+      border: 1.5px solid var(--g300);
+      background: var(--white);
+      color: var(--g600);
+      cursor: pointer;
+      transition: all .18s;
+      white-space: nowrap;
+      line-height: 1.4;
+    }
+    .f-chip:hover { border-color: var(--primary); color: var(--primary); }
+    .f-chip.on {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    /* period chip colors */
+    .f-chip[data-val="morning"].on   { background: #b45309; border-color: #b45309; }
+    .f-chip[data-val="afternoon"].on { background: #0369a1; border-color: #0369a1; }
+    .f-chip[data-val="evening"].on   { background: #6d28d9; border-color: #6d28d9; }
+    /* type chip colors */
+    .f-chip[data-val="듣기"].on  { background: var(--c-listen);  border-color: var(--c-listen); }
+    .f-chip[data-val="읽기"].on  { background: var(--c-read);    border-color: var(--c-read); }
+    .f-chip[data-val="쓰기"].on  { background: var(--c-write);   border-color: var(--c-write); color: #7c2d12; }
+    .f-chip[data-val="어휘"].on  { background: var(--c-vocab);   border-color: var(--c-vocab); }
+    .f-chip[data-val="문법"].on  { background: var(--c-grammar); border-color: var(--c-grammar); }
+
+    .sep { width: 1px; height: 24px; background: var(--g200); flex-shrink: 0; }
+
+    .reset-btn {
+      margin-left: auto;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: .76rem;
+      font-weight: 600;
+      border: 1.5px solid var(--g300);
+      background: transparent;
+      color: var(--g500);
+      cursor: pointer;
+      transition: all .18s;
+    }
+    .reset-btn:hover { border-color: var(--g500); color: var(--g700); }
+
+    /* ====================================================
+       MAIN CONTAINER
+    ==================================================== */
+    .main-wrap {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 28px;
+    }
+
+    .table-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .table-topbar-left {
+      font-size: .88rem;
+      color: var(--g500);
+      font-weight: 500;
+    }
+    .table-topbar-left strong {
+      color: var(--primary);
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .btn-add {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 22px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--r-sm);
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .18s, transform .12s, box-shadow .18s;
+      box-shadow: 0 2px 8px rgba(183,18,84,.28);
+    }
+    .btn-add:hover { background: var(--primary-dk); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(183,18,84,.35); }
+    .btn-add:active { transform: translateY(0); }
+
+    /* ====================================================
+       TABLE
+    ==================================================== */
+    .tbl-wrap {
+      overflow-x: auto;
+      border-radius: var(--r);
+      box-shadow: var(--shadow-md);
+      background: var(--white);
+    }
+
+    .sched-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+
+    /* HEAD */
+    .sched-tbl thead th {
+      background: var(--g900);
+      color: #fff;
+      padding: 13px 10px;
+      font-size: .82rem;
+      font-weight: 700;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .sched-tbl thead th.th-period { width: 52px; min-width: 52px; }
+    .sched-tbl thead th.th-time   { width: 148px; min-width: 148px; }
+    .sched-tbl thead th.th-day    { min-width: 110px; }
+    .sched-tbl thead th.th-sat    { background: #1a3870; }
+    .sched-tbl thead th.th-sun    { background: #6b1a1a; }
+
+    /* PERIOD GROUP separator */
+    .grp-last td { border-bottom: 2.5px solid var(--g300) !important; }
+
+    /* PERIOD CELL */
+    .td-period {
+      text-align: center;
+      font-weight: 900;
+      font-size: .82rem;
+      letter-spacing: .06em;
+      border-right: 2px solid var(--g200);
+      vertical-align: middle;
+      padding: 0 6px;
+    }
+    .td-period-inner {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 0;
+    }
+    .td-period-emoji { font-size: 1rem; }
+    .td-period-text  { font-size: .75rem; font-weight: 800; letter-spacing: .1em; }
+
+    /* Period row theming */
+    .row-morning .td-period,
+    .row-morning .td-time  { background: #fffbeb; }
+    .row-morning .td-period { color: #b45309; }
+
+    .row-afternoon .td-period,
+    .row-afternoon .td-time { background: #f0f9ff; }
+    .row-afternoon .td-period { color: #0369a1; }
+
+    .row-evening .td-period,
+    .row-evening .td-time   { background: #f5f3ff; }
+    .row-evening .td-period { color: #6d28d9; }
+
+    /* TIME CELL */
+    .td-time {
+      padding: 10px 12px;
+      border-right: 2px solid var(--g200);
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .tz-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 4px;
+      font-size: .77rem;
+    }
+    .tz-row:last-child { margin-bottom: 0; }
+    .tz-badge {
+      display: inline-block;
+      font-size: .6rem;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
+      min-width: 22px;
+      text-align: center;
+      letter-spacing: .04em;
+    }
+    .tz-badge.vn  { background: var(--vn-bg); color: var(--vn); }
+    .tz-badge.kr  { background: var(--kr-bg); color: var(--kr); }
+    .tz-badge.my  { background: var(--my-bg); color: var(--my); }
+    .tz-time { font-weight: 600; color: var(--g700); }
+
+    /* DAY CELL */
+    .td-day {
+      padding: 7px 7px 26px;
+      vertical-align: top;
+      border-bottom: 1px solid var(--g100);
+      border-right: 1px solid var(--g100);
+      position: relative;
+      transition: background .15s;
+      min-height: 58px;
+    }
+    .td-day:last-child { border-right: none; }
+    .td-day.td-sat { background: #f8faff; }
+    .td-day.td-sun { background: #fff8f8; }
+    .td-day:hover  { background: #fdf2f7; }
+    .td-day.td-sat:hover { background: #eef3ff; }
+    .td-day.td-sun:hover { background: #fff0f0; }
+
+    /* Cell add button */
+    .cell-add {
+      position: absolute;
+      bottom: 4px; right: 5px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 1.5px dashed var(--g300);
+      background: transparent;
+      color: var(--g400);
+      font-size: .9rem;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity .15s, background .15s, color .15s, border-color .15s;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0;
+    }
+    .td-day:hover .cell-add {
+      opacity: 1;
+    }
+    .cell-add:hover {
+      background: var(--primary-lt);
+      color: var(--primary);
+      border-color: var(--primary);
+      border-style: solid;
+    }
+
+    /* CLASS CARD */
+    .cls-card {
+      display: flex;
+      flex-direction: column;
+      padding: 6px 8px;
+      border-radius: var(--r-xs);
+      border-left: 3px solid;
+      margin-bottom: 4px;
+      cursor: pointer;
+      transition: transform .13s, box-shadow .13s, opacity .2s;
+      position: relative;
+    }
+    .cls-card:last-of-type { margin-bottom: 0; }
+    .cls-card:hover { transform: translateY(-1px); box-shadow: 0 2px 10px rgba(0,0,0,.12); }
+    .cls-card.dimmed { opacity: .22; pointer-events: none; }
+
+    .card-subj {
+      font-weight: 700;
+      font-size: .78rem;
+      line-height: 1.3;
+      margin-bottom: 3px;
+    }
+    .card-tags {
+      display: flex;
+      gap: 3px;
+      flex-wrap: wrap;
+    }
+    .card-tag {
+      font-size: .6rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: rgba(255,255,255,.55);
+      letter-spacing: .02em;
+    }
+
+    /* Hidden row */
+    tr.row-hidden { display: none; }
+
+    /* ====================================================
+       MODAL
+    ==================================================== */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.48);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .22s, visibility .22s;
+    }
+    .modal-bg.open {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal {
+      background: var(--white);
+      border-radius: var(--r);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 500px;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      transform: scale(.96) translateY(10px);
+      transition: transform .22s;
+    }
+    .modal-bg.open .modal { transform: scale(1) translateY(0); }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--g200);
+      flex-shrink: 0;
+    }
+    .modal-head h2 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--g900);
+    }
+    .modal-close {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      border: none;
+      background: var(--g100);
+      color: var(--g500);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, color .15s;
+    }
+    .modal-close:hover { background: var(--g200); color: var(--g800); }
+
+    .modal-body {
+      overflow-y: auto;
+      padding: 18px 22px;
+      flex: 1;
+    }
+
+    .form-row { margin-bottom: 16px; }
+
+    .form-label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 800;
+      color: var(--g600);
+      margin-bottom: 7px;
+      letter-spacing: .02em;
+    }
+    .form-label em {
+      font-style: normal;
+      font-size: .72rem;
+      font-weight: 500;
+      color: var(--g400);
+      margin-left: 4px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid var(--g300);
+      border-radius: var(--r-sm);
+      font-size: .9rem;
+      color: var(--g800);
+      outline: none;
+      transition: border-color .18s;
+    }
+    .form-input:focus { border-color: var(--primary); }
+    .form-input.err   { border-color: #ef4444; }
+
+    .form-select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid var(--g300);
+      border-radius: var(--r-sm);
+      font-size: .9rem;
+      color: var(--g800);
+      background: var(--white);
+      outline: none;
+      cursor: pointer;
+      transition: border-color .18s;
+    }
+    .form-select:focus { border-color: var(--primary); }
+
+    /* Chip radio/checkbox */
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+    .chip-row input { display: none; }
+    .chip-row label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 13px;
+      border-radius: 20px;
+      font-size: .8rem;
+      font-weight: 600;
+      border: 1.5px solid var(--g300);
+      color: var(--g600);
+      cursor: pointer;
+      transition: all .16s;
+      user-select: none;
+    }
+    .chip-row label:hover { border-color: var(--primary); color: var(--primary); }
+    .chip-row input:checked + label {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    /* Day chips */
+    #dayGroup input[value="sat"]:checked + label { background: #1d4ed8; border-color: #1d4ed8; }
+    #dayGroup input[value="sun"]:checked + label { background: #dc2626; border-color: #dc2626; }
+
+    /* Type chip colors */
+    #typeGroup input[value="듣기"]:checked + label  { background: var(--c-listen);  border-color: var(--c-listen); }
+    #typeGroup input[value="읽기"]:checked + label  { background: var(--c-read);    border-color: var(--c-read); }
+    #typeGroup input[value="쓰기"]:checked + label  { background: var(--c-write);   border-color: var(--c-write); color: #7c2d12; }
+    #typeGroup input[value="어휘"]:checked + label  { background: var(--c-vocab);   border-color: var(--c-vocab); }
+    #typeGroup input[value="문법"]:checked + label  { background: var(--c-grammar); border-color: var(--c-grammar); }
+
+    /* Color picker */
+    .color-row { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+
+    .cswatch {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 2.5px solid transparent;
+      cursor: pointer;
+      transition: transform .15s, border-color .15s;
+      flex-shrink: 0;
+    }
+    .cswatch:hover, .cswatch.on { transform: scale(1.25); border-color: var(--g800) !important; }
+
+    .cswatch-auto {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 2px dashed var(--g400);
+      background: conic-gradient(#ef4444 0%, #f59e0b 20%, #10b981 40%, #3b82f6 60%, #8b5cf6 80%, #ef4444 100%);
+      cursor: pointer;
+      transition: transform .15s;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .5rem;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 3px rgba(0,0,0,.8);
+      flex-shrink: 0;
+    }
+    .cswatch-auto:hover, .cswatch-auto.on { transform: scale(1.25); }
+
+    /* Modal footer */
+    .modal-foot {
+      padding: 14px 22px 18px;
+      border-top: 1px solid var(--g200);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .spacer { flex: 1; }
+
+    .btn {
+      padding: 9px 20px;
+      border-radius: var(--r-sm);
+      font-size: .86rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all .16s;
+    }
+    .btn-primary  { background: var(--primary); color: #fff; }
+    .btn-primary:hover  { background: var(--primary-dk); }
+    .btn-secondary { background: var(--g100); color: var(--g700); }
+    .btn-secondary:hover { background: var(--g200); }
+    .btn-danger   { background: #fee2e2; color: #dc2626; }
+    .btn-danger:hover { background: #fecaca; }
+
+    /* ====================================================
+       RESPONSIVE
+    ==================================================== */
+    @media (max-width: 720px) {
+      .header-inner { padding: 0 16px; }
+      .hero { padding: 28px 16px 22px; }
+      .hero h1 { font-size: 1.5rem; }
+      .course-bar { padding-left: 16px; padding-right: 16px; }
+      .filter-bar, .main-wrap { padding-left: 16px; padding-right: 16px; }
+    }
   </style>
 </head>
 <body>
-<header>
-  <div class="header-inner">
-    <a class="logo" href="#">한국어<span>Academy</span></a>
-    <span class="header-badge">주간 시간표</span>
-  </div>
-</header>
-<section class="hero">
-  <div class="hero-label">Weekly Schedule</div>
-  <h1>수업 시간표</h1>
-  <p>초급 · 중급 · 고급 &nbsp;|&nbsp; 듣기 · 읽기 &nbsp;|&nbsp; 오전 · 오후 · 저녁</p>
-</section>
-<div class="legend-bar">
-  <div class="legend-inner">
-    <span class="legend-title">범례</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#3b82f6"></span>초급 듣기</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#8b5cf6"></span>초급 읽기</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#10b981"></span>중급 듣기</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>중급 읽기</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#ef4444"></span>고급 듣기</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#f472b6"></span>고급 읽기</span>
-  </div>
-</div>
-<div class="filter-section">
-  <!-- 활성 필터 칩 -->
-  <div class="active-filters" id="activeFilters"></div>
 
-  <div class="filter-groups" id="filterGroups">
-    <!-- 수업 유형 -->
-    <div class="filter-group">
-      <span class="filter-group-label">수업유형</span>
-      <span class="filter-divider"></span>
-      <button class="tab-btn" data-group="type" data-filter="듣기" id="tab-listen">🎧 듣기</button>
-      <button class="tab-btn" data-group="type" data-filter="읽기" id="tab-read">📖 읽기</button>
+  <!-- ===================== HEADER ===================== -->
+  <header>
+    <div class="header-inner">
+      <a href="#" class="logo">Korean<em>Academy</em></a>
+      <div class="header-right">
+        <label class="tz-toggle" id="myToggleLabel" title="말레이시아(MY) 시간 표시/숨기기">
+          <input type="checkbox" id="myToggle">
+          <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          <span class="toggle-label">🇲🇾 MY 시간 표시</span>
+        </label>
+      </div>
     </div>
-    <!-- 급별 -->
-    <div class="filter-group">
-      <span class="filter-group-label">급별</span>
-      <span class="filter-divider"></span>
-      <button class="tab-btn" data-group="level" data-filter="초급" id="tab-beginner">초급</button>
-      <button class="tab-btn" data-group="level" data-filter="중급" id="tab-intermediate">중급</button>
-      <button class="tab-btn" data-group="level" data-filter="고급" id="tab-advanced">고급</button>
-    </div>
-    <!-- 시간대 -->
-    <div class="filter-group">
-      <span class="filter-group-label">시간대</span>
-      <span class="filter-divider"></span>
-      <button class="tab-btn" data-group="period" data-filter="오전" id="tab-morning">오전</button>
-      <button class="tab-btn" data-group="period" data-filter="오후1" id="tab-afternoon1">오후1</button>
-      <button class="tab-btn" data-group="period" data-filter="오후2" id="tab-afternoon2">오후2</button>
-      <button class="tab-btn" data-group="period" data-filter="저녁" id="tab-evening">저녁</button>
+  </header>
+
+  <!-- ===================== HERO ===================== -->
+  <div class="hero">
+    <div class="hero-badge">Weekly Schedule</div>
+    <h1>📅 주간 수업 시간표</h1>
+    <div class="hero-sub">
+      <span class="hero-tz">🇻🇳 베트남 VN (UTC+7)</span>
+      <span class="hero-tz">🇰🇷 한국 KR (UTC+9)</span>
+      <span class="hero-tz" id="heroMyBadge" style="display:none">🇲🇾 말레이시아 MY (UTC+8)</span>
     </div>
   </div>
-</div>
-<div class="table-section">
-  <div class="table-card">
-    <div class="table-scroll">
-      <table class="schedule" id="scheduleTable">
+
+  <!-- ===================== COURSE CONTROL BAR ===================== -->
+  <div class="course-bar-wrap">
+    <div class="course-bar">
+      <div class="course-selector-group">
+        <span class="course-label">📚 선택된 코스:</span>
+        <select class="course-select" id="courseSelect"></select>
+      </div>
+      <div class="course-actions">
+        <button class="btn-c-action primary" id="newCourseBtn">➕ 새 코스 만들기</button>
+        <button class="btn-c-action" id="renameCourseBtn">✏️ 코스 이름 변경</button>
+        <button class="btn-c-action" id="dupCourseBtn">📋 코스 복사</button>
+        <button class="btn-c-action danger" id="delCourseBtn">🗑️ 코스 삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== FILTER BAR ===================== -->
+  <div class="filter-bar-wrap">
+    <div class="filter-bar">
+
+      <div class="filter-group">
+        <span class="filter-group-label">급수</span>
+        <button class="f-chip" data-filter="level" data-val="초급">초급</button>
+        <button class="f-chip" data-filter="level" data-val="중급">중급</button>
+        <button class="f-chip" data-filter="level" data-val="고급">고급</button>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="filter-group">
+        <span class="filter-group-label">수업 유형</span>
+        <button class="f-chip" data-filter="type" data-val="듣기">🎧 듣기</button>
+        <button class="f-chip" data-filter="type" data-val="읽기">📖 읽기</button>
+        <button class="f-chip" data-filter="type" data-val="쓰기">✏️ 쓰기</button>
+        <button class="f-chip" data-filter="type" data-val="어휘">📝 어휘</button>
+        <button class="f-chip" data-filter="type" data-val="문법">📐 문법</button>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="filter-group">
+        <span class="filter-group-label">시간대</span>
+        <button class="f-chip" data-filter="period" data-val="morning">☀️ 오전</button>
+        <button class="f-chip" data-filter="period" data-val="afternoon">🌤 오후</button>
+        <button class="f-chip" data-filter="period" data-val="evening">🌙 저녁</button>
+      </div>
+
+      <button class="reset-btn" id="resetBtn">↺ 필터 초기화</button>
+    </div>
+  </div>
+
+  <!-- ===================== MAIN ===================== -->
+  <div class="main-wrap">
+    <div class="table-topbar">
+      <div class="table-topbar-left">
+        현재 코스 등록 수업: <strong id="clsCnt">0</strong>개
+      </div>
+      <button class="btn-add" id="openAddBtn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+          <line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/>
+        </svg>
+        수업 추가
+      </button>
+    </div>
+
+    <div class="tbl-wrap">
+      <table class="sched-tbl" id="schedTbl">
         <thead>
           <tr>
-            <th>시간대</th><th>시간</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th>
+            <th class="th-period">시간대</th>
+            <th class="th-time">시간</th>
+            <th class="th-day">월</th>
+            <th class="th-day">화</th>
+            <th class="th-day">수</th>
+            <th class="th-day">목</th>
+            <th class="th-day">금</th>
+            <th class="th-day th-sat">토</th>
+            <th class="th-day th-sun">일</th>
           </tr>
         </thead>
-        <tbody id="tableBody"></tbody>
+        <tbody id="schedBody"></tbody>
       </table>
     </div>
   </div>
-</div>
-<footer>
-  <strong>한국어 아카데미</strong> &nbsp;·&nbsp; 수업 시간표 &nbsp;·&nbsp; 문의: 02-570-4418
-</footer>
-<script>
-// ── DATA ──
-const rows=[
-  {p:'오전',t:'9:00',월:'초급 듣기 A / 초급 읽기 B / 중급 듣기 A',화:'초급 듣기 A / 초급 읽기 B / 중급 듣기 A',수:'초급 듣기 A / 초급 읽기 B / 중급 듣기 A',목:'초급 듣기 A / 초급 읽기 B / 중급 듣기 A',금:'초급 듣기 A / 초급 읽기 B / 중급 듣기 A'},
-  {p:'오전',t:'10:00',월:'초급 읽기 A / 초급 듣기 B / 중급 읽기 B',화:'초급 읽기 A / 초급 듣기 B / 중급 읽기 B',수:'초급 읽기 A / 초급 듣기 B / 중급 읽기 B',목:'초급 읽기 A / 초급 듣기 B / 중급 읽기 B',금:'초급 읽기 A / 초급 듣기 B / 중급 읽기 B'},
-  {p:'오전',t:'11:00',월:'중급 읽기 A / 고급 듣기 A / 고급 읽기 B',화:'중급 읽기 A / 고급 듣기 A / 고급 읽기 B',수:'중급 읽기 A / 고급 듣기 A / 고급 읽기 B',목:'중급 읽기 A / 고급 듣기 A / 고급 읽기 B',금:'중급 읽기 A / 고급 듣기 A / 고급 읽기 B'},
-  {p:'오전',t:'12:00',월:'중급 듣기 B / 고급 듣기 B / 고급 읽기 A',화:'중급 듣기 B / 고급 듣기 B / 고급 읽기 A',수:'중급 듣기 B / 고급 듣기 B / 고급 읽기 A',목:'중급 듣기 B / 고급 듣기 B / 고급 읽기 A',금:'중급 듣기 B / 고급 듣기 B / 고급 읽기 A'},
-  {p:'오후1',t:'13:00',월:'초급 듣기 A / 초급 읽기 B',화:'',수:'초급 듣기 A / 초급 읽기 B',목:'',금:'초급 듣기 B / 초급 읽기 B'},
-  {p:'오후1',t:'14:00',월:'초급 듣기 B / 초급 읽기 A',화:'',수:'초급 듣기 B / 초급 듣기 B',목:'',금:'초급 듣기 B / 초급 듣기 B'},
-  {p:'오후1',t:'15:00',월:'중급 듣기 A / 중급 읽기 B',화:'',수:'중급 듣기 A / 중급 읽기 B',목:'',금:'중급 듣기 A / 중급 읽기 B'},
-  {p:'오후2',t:'15:00',월:'중급 듣기 B / 중급 듣기 B',화:'',수:'중급 듣기 B / 중급 듣기 B',목:'',금:'중급 듣기 B / 중급 듣기 B'},
-  {p:'오후2',t:'16:00',월:'고급 듣기 A / 고급 읽기 B',화:'',수:'고급 듣기 A / 고급 읽기 B',목:'',금:'고급 듣기 A / 고급 읽기 B'},
-  {p:'오후2',t:'17:00',월:'고급 듣기 B / 고급 듣기 B',화:'',수:'고급 듣기 B / 고급 듣기 B',목:'',금:'고급 듣기 B / 고급 듣기 B'},
-  {p:'저녁',t:'19:00',월:'중급 읽기 A / 중급 듣기 B',화:'',수:'중급 읽기 A / 중급 듣기 B',목:'',금:'중급 읽기 A / 중급 듣기 B'},
-  {p:'저녁',t:'20:00',월:'중급 읽기 A / 중급 듣기 B',화:'',수:'중급 읽기 A / 중급 듣기 B',목:'',금:'중급 읽기 A / 중급 듣기 B'},
-  {p:'저녁',t:'21:00',월:'고급 듣기 A / 고급 읽기 B',화:'',수:'고급 듣기 A / 고급 읽기 B',목:'',금:'고급 듣기 A / 고급 읽기 B'},
-];
 
-const icons={'듣기':'🎧','읽기':'📖'};
-const tagClass={'초급-듣기':'tag-초급-듣기','초급-읽기':'tag-초급-읽기','중급-듣기':'tag-중급-듣기','중급-읽기':'tag-중급-읽기','고급-듣기':'tag-고급-듣기','고급-읽기':'tag-고급-읽기'};
-const chipClass={type:'chip-type',level:'chip-level',period:'chip-period'};
-const chipLabel={type:'유형',level:'급별',period:'시간'};
+  <!-- ===================== MODAL ===================== -->
+  <div class="modal-bg" id="modalBg">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h2 id="modalTitle">수업 추가</h2>
+        <button class="modal-close" id="modalClose" aria-label="닫기">✕</button>
+      </div>
 
-// ── ACTIVE FILTERS STATE ──
-// Each group allows only one active value (or null = no filter)
-const activeFilters={type:null,level:null,period:null};
+      <div class="modal-body">
 
-// ── TAG HTML ──
-function classTagHtml(str,typeF,levelF){
-  const[lv,tp,g]=str.trim().split(' ');
-  const cls=tagClass[lv+'-'+tp]||'';
-  const ic=icons[tp]||'';
-  // dimmed when it doesn't match active filters
-  const typeOk=!typeF||tp===typeF;
-  const levelOk=!levelF||lv===levelF;
-  const dimmed=(typeOk&&levelOk)?'':' dimmed';
-  return`<span class="class-tag ${cls}${dimmed}">${ic} ${lv} ${tp} <b>${g||''}</b></span>`;
-}
+        <!-- 과목명 -->
+        <div class="form-row">
+          <label class="form-label" for="subjectInput">과목명 <em>*필수</em></label>
+          <input type="text" class="form-input" id="subjectInput"
+                 placeholder="예: 초급 듣기, 1급 어휘, TOPIK 쓰기" autocomplete="off">
+        </div>
 
-// ── CELL HTML ──
-function cellHtml(val,typeF,levelF){
-  if(!val)return'<td class="class-cell"><span class="empty-cell">—</span></td>';
-  const classes=val.split(' / ');
-  const tags=classes.map(s=>classTagHtml(s,typeF,levelF)).join('');
-  // if every tag in this cell is dimmed, mark cell as all-dimmed
-  const allDimmed=classes.every(s=>{
-    const[lv,tp]=s.trim().split(' ');
-    return (typeF&&tp!==typeF)||(levelF&&lv!==levelF);
-  });
-  return`<td class="class-cell${allDimmed?' all-dimmed':''}"><div class="class-pair">${tags}</div></td>`;
-}
+        <!-- 급수 -->
+        <div class="form-row">
+          <label class="form-label">급수</label>
+          <div class="chip-row" id="levelGroup">
+            <input type="radio" name="level" id="lv-beg" value="초급"><label for="lv-beg">초급</label>
+            <input type="radio" name="level" id="lv-mid" value="중급"><label for="lv-mid">중급</label>
+            <input type="radio" name="level" id="lv-adv" value="고급"><label for="lv-adv">고급</label>
+            <input type="radio" name="level" id="lv-cus" value="custom"><label for="lv-cus">✏️ 직접입력</label>
+          </div>
+          <input type="text" class="form-input" id="lvCustom"
+                 placeholder="예: 1급, 2급, TOPIK II"
+                 style="margin-top:8px;display:none">
+        </div>
 
-// ── BUILD TABLE ──
-function buildTable(){
-  const tbody=document.getElementById('tableBody');
-  tbody.innerHTML='';
-  const days=['월','화','수','목','금'];
-  const{type:typeF,level:levelF,period:periodF}=activeFilters;
-  let prevP='';
-  let anyRow=false;
+        <!-- 수업 유형 -->
+        <div class="form-row">
+          <label class="form-label">수업 유형</label>
+          <div class="chip-row" id="typeGroup">
+            <input type="radio" name="type" id="ty-li" value="듣기"><label for="ty-li">🎧 듣기</label>
+            <input type="radio" name="type" id="ty-re" value="읽기"><label for="ty-re">📖 읽기</label>
+            <input type="radio" name="type" id="ty-wr" value="쓰기"><label for="ty-wr">✏️ 쓰기</label>
+            <input type="radio" name="type" id="ty-vo" value="어휘"><label for="ty-vo">📝 어휘</label>
+            <input type="radio" name="type" id="ty-gr" value="문법"><label for="ty-gr">📐 문법</label>
+          </div>
+        </div>
 
-  rows.forEach(row=>{
-    // Period (time-of-day) filter: hide entire row if doesn't match
-    if(periodF&&row.p!==periodF)return;
+        <!-- 시간 슬롯 -->
+        <div class="form-row">
+          <label class="form-label" for="slotSel">시간대 <em>베트남 기준</em></label>
+          <select class="form-select" id="slotSel">
+            <optgroup label="☀️ 오전">
+              <option value="0">오전  09:00~10:00 (VN) ／ 11:00~12:00 (KR) ／ 10:00~11:00 (MY)</option>
+              <option value="1">오전  10:00~11:00 (VN) ／ 12:00~13:00 (KR) ／ 11:00~12:00 (MY)</option>
+              <option value="2">오전  11:00~12:00 (VN) ／ 13:00~14:00 (KR) ／ 12:00~13:00 (MY)</option>
+            </optgroup>
+            <optgroup label="🌤 오후">
+              <option value="3">오후  14:00~15:00 (VN) ／ 16:00~17:00 (KR) ／ 15:00~16:00 (MY)</option>
+              <option value="4">오후  15:00~16:00 (VN) ／ 17:00~18:00 (KR) ／ 16:00~17:00 (MY)</option>
+              <option value="5">오후  16:00~17:00 (VN) ／ 18:00~19:00 (KR) ／ 17:00~18:00 (MY)</option>
+            </optgroup>
+            <optgroup label="🌙 저녁">
+              <option value="6">저녁  19:00~20:00 (VN) ／ 21:00~22:00 (KR) ／ 20:00~21:00 (MY)</option>
+              <option value="7">저녁  20:00~21:00 (VN) ／ 22:00~23:00 (KR) ／ 21:00~22:00 (MY)</option>
+              <option value="8">저녁  21:00~22:00 (VN) ／ 23:00~00:00 (KR) ／ 22:00~23:00 (MY)</option>
+            </optgroup>
+          </select>
+        </div>
 
-    // Level filter: hide row if no cell in this row contains the level
-    if(levelF&&!days.some(d=>(row[d]||'').includes(levelF)))return;
+        <!-- 요일 -->
+        <div class="form-row">
+          <label class="form-label">요일 선택 <em>복수 선택 가능</em></label>
+          <div class="chip-row" id="dayGroup">
+            <input type="checkbox" name="day" id="d-mon" value="mon"><label for="d-mon">월</label>
+            <input type="checkbox" name="day" id="d-tue" value="tue"><label for="d-tue">화</label>
+            <input type="checkbox" name="day" id="d-wed" value="wed"><label for="d-wed">수</label>
+            <input type="checkbox" name="day" id="d-thu" value="thu"><label for="d-thu">목</label>
+            <input type="checkbox" name="day" id="d-fri" value="fri"><label for="d-fri">금</label>
+            <input type="checkbox" name="day" id="d-sat" value="sat"><label for="d-sat">토</label>
+            <input type="checkbox" name="day" id="d-sun" value="sun"><label for="d-sun">일</label>
+          </div>
+        </div>
 
-    // Type filter: hide row if no cell in this row contains the type
-    if(typeF&&!days.some(d=>(row[d]||'').includes(typeF)))return;
+        <!-- 색상 -->
+        <div class="form-row">
+          <label class="form-label">카드 색상 <em>자동 = 유형 기본색</em></label>
+          <div class="color-row" id="colorRow"></div>
+        </div>
 
-    anyRow=true;
+      </div><!-- /modal-body -->
 
-    // Section header
-    if(row.p!==prevP){
-      const sec=document.createElement('tr');
-      sec.className='section-row';
-      sec.innerHTML=`<td colspan="7">${row.p}</td>`;
-      tbody.appendChild(sec);
-      prevP=row.p;
+      <div class="modal-foot">
+        <button class="btn btn-danger" id="deleteBtn" style="display:none">🗑 삭제</button>
+        <div class="spacer"></div>
+        <button class="btn btn-secondary" id="cancelBtn">취소</button>
+        <button class="btn btn-primary"  id="saveBtn">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SCRIPT ===================== -->
+  <script>
+  (() => {
+    'use strict';
+
+    /* ── CONSTANTS ── */
+    const SLOTS = [
+      { i:0, period:'morning',   label:'오전', emoji:'☀️', vn:'09:00~10:00', kr:'11:00~12:00', my:'10:00~11:00' },
+      { i:1, period:'morning',   label:'오전', emoji:'☀️', vn:'10:00~11:00', kr:'12:00~13:00', my:'11:00~12:00' },
+      { i:2, period:'morning',   label:'오전', emoji:'☀️', vn:'11:00~12:00', kr:'13:00~14:00', my:'12:00~13:00' },
+      { i:3, period:'afternoon', label:'오후', emoji:'🌤', vn:'14:00~15:00', kr:'16:00~17:00', my:'15:00~16:00' },
+      { i:4, period:'afternoon', label:'오후', emoji:'🌤', vn:'15:00~16:00', kr:'17:00~18:00', my:'16:00~17:00' },
+      { i:5, period:'afternoon', label:'오후', emoji:'🌤', vn:'16:00~17:00', kr:'18:00~19:00', my:'17:00~18:00' },
+      { i:6, period:'evening',   label:'저녁', emoji:'🌙', vn:'19:00~20:00', kr:'21:00~22:00', my:'20:00~21:00' },
+      { i:7, period:'evening',   label:'저녁', emoji:'🌙', vn:'20:00~21:00', kr:'22:00~23:00', my:'21:00~22:00' },
+      { i:8, period:'evening',   label:'저녁', emoji:'🌙', vn:'21:00~22:00', kr:'23:00~00:00', my:'22:00~23:00' },
+    ];
+
+    const DAYS = [
+      { key:'mon', label:'월' }, { key:'tue', label:'화' },
+      { key:'wed', label:'수' }, { key:'thu', label:'목' },
+      { key:'fri', label:'금' }, { key:'sat', label:'토' },
+      { key:'sun', label:'일' },
+    ];
+
+    const TYPE_CLR = {
+      '듣기': { bg:'#dbeafe', txt:'#1e40af', brd:'#3b82f6' },
+      '읽기': { bg:'#d1fae5', txt:'#065f46', brd:'#10b981' },
+      '쓰기': { bg:'#fef3c7', txt:'#92400e', brd:'#f59e0b' },
+      '어휘': { bg:'#ede9fe', txt:'#5b21b6', brd:'#8b5cf6' },
+      '문법': { bg:'#fee2e2', txt:'#991b1b', brd:'#ef4444' },
+    };
+    const DEF_CLR = { bg:'#f3f4f6', txt:'#374151', brd:'#9ca3af' };
+
+    const COLOR_PRESETS = [
+      '#ef4444','#f97316','#f59e0b','#84cc16',
+      '#10b981','#06b6d4','#3b82f6','#8b5cf6',
+      '#ec4899','#b71254','#6b7280','#1f2937',
+    ];
+
+    const LS_COURSES = 'koa_courses_v1';
+    const LS_ACTIVE  = 'koa_active_course_v1';
+    const LS_MY      = 'koa_showmy';
+
+    /* ── STATE ── */
+    let courses      = load(LS_COURSES) || [];
+    let activeCourseId = load(LS_ACTIVE)  || null;
+    let showMY       = load(LS_MY)      || false;
+
+    let filters  = { level: new Set(), type: new Set(), period: new Set() };
+    let editId   = null;
+    let pickColor = null;
+
+    function load(key) {
+      try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
+    }
+    function save(key, val) {
+      localStorage.setItem(key, JSON.stringify(val));
+    }
+    function uid() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    }
+    function esc(s) {
+      return String(s ?? '')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    const tr=document.createElement('tr');
-    let html=`<td class="period-cell">${row.p}</td><td class="time-cell">${row.t}</td>`;
-    days.forEach(d=>{html+=cellHtml(row[d]||'',typeF,levelF);});
-    tr.innerHTML=html;
-    tbody.appendChild(tr);
-  });
+    /* ── COURSE MANAGEMENT INITIALIZATION ── */
+    function initCourses() {
+      const oldV2Data = load('koa_sched_v2');
+      if (courses.length === 0) {
+        const defaultCourse = {
+          id: 'course_' + uid(),
+          name: '기본 코스 A',
+          data: oldV2Data && Array.isArray(oldV2Data) ? oldV2Data : [
+            { id: uid(), subject: '초급 듣기', level: '초급', type: '듣기', slotIdx: 0, days: ['mon','wed','fri'], color: null },
+            { id: uid(), subject: '1급 어휘', level: '초급', type: '어휘', slotIdx: 3, days: ['tue','thu','sat'], color: null }
+          ]
+        };
+        courses.push(defaultCourse);
+        activeCourseId = defaultCourse.id;
+        save(LS_COURSES, courses);
+        save(LS_ACTIVE, activeCourseId);
+      }
 
-  if(!anyRow){
-    const tr=document.createElement('tr');
-    tr.innerHTML='<td colspan="7" class="no-result">조건에 맞는 수업이 없습니다.</td>';
-    tbody.appendChild(tr);
-  }
-}
+      if (!activeCourseId || !courses.some(c => c.id === activeCourseId)) {
+        activeCourseId = courses[0].id;
+        save(LS_ACTIVE, activeCourseId);
+      }
 
-// ── RENDER ACTIVE CHIPS ──
-function renderChips(){
-  const container=document.getElementById('activeFilters');
-  container.innerHTML='';
-  let hasChip=false;
-  Object.entries(activeFilters).forEach(([group,val])=>{
-    if(!val)return;
-    hasChip=true;
-    const chip=document.createElement('span');
-    chip.className=`active-chip ${chipClass[group]}`;
-    chip.innerHTML=`${chipLabel[group]}: <b>${val}</b> <span class="chip-x">✕</span>`;
-    chip.addEventListener('click',()=>{
-      activeFilters[group]=null;
-      // deactivate button in this group
-      document.querySelectorAll(`.tab-btn[data-group="${group}"]`)
-        .forEach(b=>b.classList.remove('active'));
-      renderChips();
-      buildTable();
+      renderCourseSelect();
+    }
+
+    function getActiveCourse() {
+      return courses.find(c => c.id === activeCourseId) || courses[0];
+    }
+
+    function saveCurrentCourseData(classArray) {
+      const active = getActiveCourse();
+      if (active) {
+        active.data = classArray;
+        save(LS_COURSES, courses);
+      }
+    }
+
+    function renderCourseSelect() {
+      const select = document.getElementById('courseSelect');
+      select.innerHTML = '';
+      courses.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = `${c.name} (${c.data ? c.data.length : 0}개 수업)`;
+        if (c.id === activeCourseId) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    /* ── HELPERS ── */
+    function typeColor(type) { return TYPE_CLR[type] || DEF_CLR; }
+
+    function cardStyle(cls) {
+      if (cls.color) {
+        const h = cls.color;
+        return { bg: h + '25', txt: h, brd: h };
+      }
+      return typeColor(cls.type);
+    }
+
+    function matchesFilter(cls) {
+      const lv = filters.level.size === 0 || filters.level.has(cls.level);
+      const ty = filters.type.size  === 0 || filters.type.has(cls.type);
+      return lv && ty;
+    }
+
+    /* ── TABLE RENDER ── */
+    function render() {
+      const tbody = document.getElementById('schedBody');
+      tbody.innerHTML = '';
+
+      const currentData = getActiveCourse() ? getActiveCourse().data || [] : [];
+      let prevPeriod = null;
+
+      SLOTS.forEach((slot, idx) => {
+        const periodHidden = filters.period.size > 0 && !filters.period.has(slot.period);
+        const isGroupLast  = (idx === 2 || idx === 5 || idx === 8);
+
+        const tr = document.createElement('tr');
+        tr.dataset.period = slot.period;
+        tr.dataset.slot   = slot.i;
+        tr.className = [
+          'row-' + slot.period,
+          periodHidden ? 'row-hidden' : '',
+          isGroupLast  ? 'grp-last'  : '',
+        ].filter(Boolean).join(' ');
+
+        /* Period cell */
+        if (slot.period !== prevPeriod) {
+          const ptd = document.createElement('td');
+          ptd.rowSpan = 3;
+          ptd.className = 'td-period';
+          ptd.innerHTML = `<div class="td-period-inner">
+            <span class="td-period-emoji">${slot.emoji}</span>
+            <span class="td-period-text">${slot.label}</span>
+          </div>`;
+          tr.appendChild(ptd);
+          prevPeriod = slot.period;
+        }
+
+        /* Time cell */
+        const ttd = document.createElement('td');
+        ttd.className = 'td-time';
+        ttd.innerHTML = `
+          <div class="tz-row"><span class="tz-badge vn">VN</span><span class="tz-time">${slot.vn}</span></div>
+          <div class="tz-row"><span class="tz-badge kr">KR</span><span class="tz-time">${slot.kr}</span></div>
+          ${showMY ? `<div class="tz-row"><span class="tz-badge my">MY</span><span class="tz-time">${slot.my}</span></div>` : ''}
+        `;
+        tr.appendChild(ttd);
+
+        /* Day cells */
+        DAYS.forEach(day => {
+          const td = document.createElement('td');
+          td.className = 'td-day' +
+            (day.key === 'sat' ? ' td-sat' : day.key === 'sun' ? ' td-sun' : '');
+          td.dataset.day  = day.key;
+          td.dataset.slot = slot.i;
+
+          const classes = currentData.filter(c =>
+            c.days.includes(day.key) && c.slotIdx === slot.i
+          );
+
+          classes.forEach(cls => {
+            td.appendChild(makeCard(cls));
+          });
+
+          /* + button */
+          const addBtn = document.createElement('button');
+          addBtn.className  = 'cell-add';
+          addBtn.textContent = '+';
+          addBtn.title = `${slot.label} ${slot.vn} ${day.label}요일 수업 추가`;
+          addBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            openModal(null, slot.i, day.key);
+          });
+          td.appendChild(addBtn);
+
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('clsCnt').textContent = currentData.length;
+      renderCourseSelect();
+    }
+
+    function makeCard(cls) {
+      const c = cardStyle(cls);
+      const visible = matchesFilter(cls);
+
+      const card = document.createElement('div');
+      card.className = 'cls-card' + (visible ? '' : ' dimmed');
+      card.style.cssText =
+        `background:${c.bg};color:${c.txt};border-left-color:${c.brd}`;
+
+      let tags = '';
+      if (cls.level) tags += `<span class="card-tag">${esc(cls.level)}</span>`;
+      if (cls.type)  tags += `<span class="card-tag">${esc(cls.type)}</span>`;
+
+      card.innerHTML = `
+        <div class="card-subj">${esc(cls.subject)}</div>
+        ${tags ? `<div class="card-tags">${tags}</div>` : ''}
+      `;
+      card.addEventListener('click', () => openModal(cls.id));
+      return card;
+    }
+
+    /* ── COURSE EVENTS ── */
+    document.getElementById('courseSelect').addEventListener('change', (e) => {
+      activeCourseId = e.target.value;
+      save(LS_ACTIVE, activeCourseId);
+      render();
     });
-    container.appendChild(chip);
-  });
-  container.style.display=hasChip?'flex':'none';
-}
 
-// ── BUTTON CLICK ──
-document.getElementById('filterGroups').addEventListener('click',e=>{
-  const btn=e.target.closest('.tab-btn');
-  if(!btn)return;
-  const group=btn.dataset.group;
-  const val=btn.dataset.filter;
-  if(!group||!val)return;
+    document.getElementById('newCourseBtn').addEventListener('click', () => {
+      const name = prompt('새 코스(시간표 프리셋)의 이름을 입력하세요:', `코스 ${courses.length + 1}`);
+      if (!name || !name.trim()) return;
 
-  if(activeFilters[group]===val){
-    // toggle off
-    activeFilters[group]=null;
-    btn.classList.remove('active');
-  }else{
-    // deactivate previous in same group
-    document.querySelectorAll(`.tab-btn[data-group="${group}"]`)
-      .forEach(b=>b.classList.remove('active'));
-    activeFilters[group]=val;
-    btn.classList.add('active');
-  }
-  renderChips();
-  buildTable();
-});
+      const newCourse = {
+        id: 'course_' + uid(),
+        name: name.trim(),
+        data: []
+      };
+      courses.push(newCourse);
+      activeCourseId = newCourse.id;
+      save(LS_COURSES, courses);
+      save(LS_ACTIVE, activeCourseId);
+      render();
+    });
 
-// ── INIT ──
-renderChips();
-buildTable();
-</script>
+    document.getElementById('renameCourseBtn').addEventListener('click', () => {
+      const active = getActiveCourse();
+      if (!active) return;
+      const newName = prompt('코스 이름을 수정하세요:', active.name);
+      if (!newName || !newName.trim()) return;
+
+      active.name = newName.trim();
+      save(LS_COURSES, courses);
+      render();
+    });
+
+    document.getElementById('dupCourseBtn').addEventListener('click', () => {
+      const active = getActiveCourse();
+      if (!active) return;
+
+      const dupCourse = {
+        id: 'course_' + uid(),
+        name: active.name + ' (사본)',
+        data: JSON.parse(JSON.stringify(active.data || []))
+      };
+      courses.push(dupCourse);
+      activeCourseId = dupCourse.id;
+      save(LS_COURSES, courses);
+      save(LS_ACTIVE, activeCourseId);
+      render();
+    });
+
+    document.getElementById('delCourseBtn').addEventListener('click', () => {
+      if (courses.length <= 1) {
+        alert('최소 하나의 코스는 존재해야 합니다.');
+        return;
+      }
+      const active = getActiveCourse();
+      if (!confirm(`'${active.name}' 코스를 정말 삭제하시겠습니까?`)) return;
+
+      courses = courses.filter(c => c.id !== active.id);
+      activeCourseId = courses[0].id;
+      save(LS_COURSES, courses);
+      save(LS_ACTIVE, activeCourseId);
+      render();
+    });
+
+    /* ── FILTERS ── */
+    document.querySelectorAll('.f-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const fType = btn.dataset.filter;
+        const val   = btn.dataset.val;
+        if (filters[fType].has(val)) {
+          filters[fType].delete(val);
+          btn.classList.remove('on');
+        } else {
+          filters[fType].add(val);
+          btn.classList.add('on');
+        }
+        render();
+      });
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      filters = { level: new Set(), type: new Set(), period: new Set() };
+      document.querySelectorAll('.f-chip.on').forEach(b => b.classList.remove('on'));
+      render();
+    });
+
+    /* ── MY TOGGLE ── */
+    const myToggle = document.getElementById('myToggle');
+    myToggle.checked = showMY;
+
+    myToggle.addEventListener('change', () => {
+      showMY = myToggle.checked;
+      save(LS_MY, showMY);
+      document.getElementById('heroMyBadge').style.display = showMY ? '' : 'none';
+      render();
+    });
+
+    if (showMY) document.getElementById('heroMyBadge').style.display = '';
+
+    /* ── COLOR PICKER ── */
+    function buildColorPicker() {
+      const row = document.getElementById('colorRow');
+      row.innerHTML = '';
+
+      /* Auto swatch */
+      const auto = document.createElement('div');
+      auto.className = 'cswatch-auto' + (pickColor === null ? ' on' : '');
+      auto.title = '수업 유형 기본색 자동 적용';
+      auto.textContent = '자동';
+      auto.style.fontSize = '.48rem';
+      auto.addEventListener('click', () => { pickColor = null; refreshSwatches(); });
+      row.appendChild(auto);
+
+      /* Preset swatches */
+      COLOR_PRESETS.forEach(hex => {
+        const sw = document.createElement('div');
+        sw.className = 'cswatch' + (pickColor === hex ? ' on' : '');
+        sw.style.background = hex;
+        sw.style.borderColor = pickColor === hex ? '#1f2937' : 'transparent';
+        sw.title = hex;
+        sw.addEventListener('click', () => { pickColor = hex; refreshSwatches(); });
+        row.appendChild(sw);
+      });
+    }
+
+    function refreshSwatches() {
+      const auto = document.querySelector('.cswatch-auto');
+      if (auto) auto.classList.toggle('on', pickColor === null);
+      document.querySelectorAll('.cswatch').forEach(sw => {
+        const isOn = sw.title === pickColor;
+        sw.classList.toggle('on', isOn);
+        sw.style.borderColor = isOn ? '#1f2937' : 'transparent';
+      });
+    }
+
+    /* ── MODAL ── */
+    function openModal(id = null, presetSlot = null, presetDay = null) {
+      editId    = id;
+      pickColor = null;
+
+      /* Reset form */
+      document.getElementById('subjectInput').value = '';
+      document.getElementById('subjectInput').classList.remove('err');
+      document.querySelectorAll('[name="level"]').forEach(r => r.checked = false);
+      document.querySelectorAll('[name="type"]').forEach(r  => r.checked = false);
+      document.querySelectorAll('[name="day"]').forEach(c   => c.checked = false);
+      document.getElementById('lvCustom').style.display = 'none';
+      document.getElementById('lvCustom').value = '';
+      document.getElementById('slotSel').value = '0';
+
+      buildColorPicker();
+
+      const active = getActiveCourse();
+      const currentData = active ? active.data || [] : [];
+
+      if (id) {
+        /* Edit mode */
+        const cls = currentData.find(c => c.id === id);
+        if (!cls) return;
+
+        document.getElementById('subjectInput').value = cls.subject || '';
+        document.getElementById('slotSel').value = cls.slotIdx;
+
+        const STD = ['초급','중급','고급'];
+        if (STD.includes(cls.level)) {
+          const r = document.querySelector(`[name="level"][value="${cls.level}"]`);
+          if (r) r.checked = true;
+        } else if (cls.level) {
+          const r = document.getElementById('lv-cus');
+          if (r) r.checked = true;
+          document.getElementById('lvCustom').value   = cls.level;
+          document.getElementById('lvCustom').style.display = 'block';
+        }
+
+        if (cls.type) {
+          const r = document.querySelector(`[name="type"][value="${cls.type}"]`);
+          if (r) r.checked = true;
+        }
+
+        cls.days.forEach(d => {
+          const cb = document.querySelector(`[name="day"][value="${d}"]`);
+          if (cb) cb.checked = true;
+        });
+
+        pickColor = cls.color || null;
+        buildColorPicker();
+
+        document.getElementById('deleteBtn').style.display = '';
+        document.getElementById('modalTitle').textContent  = '수업 수정';
+      } else {
+        /* Add mode */
+        if (presetSlot !== null) document.getElementById('slotSel').value = presetSlot;
+        if (presetDay) {
+          const cb = document.querySelector(`[name="day"][value="${presetDay}"]`);
+          if (cb) cb.checked = true;
+        }
+        document.getElementById('deleteBtn').style.display = 'none';
+        document.getElementById('modalTitle').textContent  = '수업 추가';
+      }
+
+      document.getElementById('modalBg').classList.add('open');
+      document.getElementById('subjectInput').focus();
+    }
+
+    function closeModal() {
+      document.getElementById('modalBg').classList.remove('open');
+      editId = null;
+    }
+
+    /* open / close listeners */
+    document.getElementById('openAddBtn').addEventListener('click',  () => openModal());
+    document.getElementById('modalClose').addEventListener('click',  closeModal);
+    document.getElementById('cancelBtn').addEventListener('click',   closeModal);
+    document.getElementById('modalBg').addEventListener('click', e => {
+      if (e.target === document.getElementById('modalBg')) closeModal();
+    });
+
+    /* level custom input toggle */
+    document.querySelectorAll('[name="level"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        document.getElementById('lvCustom').style.display =
+          radio.value === 'custom' ? 'block' : 'none';
+      });
+    });
+
+    /* SAVE */
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      const subj = document.getElementById('subjectInput').value.trim();
+      if (!subj) {
+        document.getElementById('subjectInput').classList.add('err');
+        document.getElementById('subjectInput').focus();
+        setTimeout(() => document.getElementById('subjectInput').classList.remove('err'), 1600);
+        return;
+      }
+
+      const lvRadio = document.querySelector('[name="level"]:checked');
+      let level = '';
+      if (lvRadio) {
+        level = lvRadio.value === 'custom'
+          ? document.getElementById('lvCustom').value.trim()
+          : lvRadio.value;
+      }
+
+      const tyRadio = document.querySelector('[name="type"]:checked');
+      const type = tyRadio ? tyRadio.value : '';
+
+      const slotIdx = parseInt(document.getElementById('slotSel').value, 10);
+
+      const days = [...document.querySelectorAll('[name="day"]:checked')].map(c => c.value);
+      if (days.length === 0) {
+        alert('요일을 하나 이상 선택해주세요.');
+        return;
+      }
+
+      const active = getActiveCourse();
+      let currentData = active ? active.data || [] : [];
+
+      const entry = { subject: subj, level, type, slotIdx, days, color: pickColor };
+
+      if (editId) {
+        const idx = currentData.findIndex(c => c.id === editId);
+        if (idx !== -1) currentData[idx] = { ...currentData[idx], ...entry };
+      } else {
+        entry.id = uid();
+        currentData.push(entry);
+      }
+
+      saveCurrentCourseData(currentData);
+      render();
+      closeModal();
+    });
+
+    /* DELETE */
+    document.getElementById('deleteBtn').addEventListener('click', () => {
+      if (!editId) return;
+      if (!confirm('이 수업을 삭제하시겠습니까?')) return;
+      
+      const active = getActiveCourse();
+      let currentData = active ? active.data || [] : [];
+      currentData = currentData.filter(c => c.id !== editId);
+
+      saveCurrentCourseData(currentData);
+      render();
+      closeModal();
+    });
+
+    /* Keyboard escape */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    /* ── INIT ── */
+    initCourses();
+    render();
+  })();
+  </script>
+
 </body>
 </html>
