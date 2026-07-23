@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>수업 시간표 | 한국어 아카데미</title>
-  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 베트남·한국·말레이시아 시간대 동시 표시, 급수·유형별 필터 지원, 코스별 프리셋 관리, 과목 순서 변경(드래그 & 위아래 버튼)">
+  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 베트남·한국·말레이시아 시간대 동시 표시, 급수·유형별 필터 지원, 코스 비밀번호 암호화 보호, 순서 변경">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -259,6 +259,19 @@
       background-position: right 10px center;
     }
     .course-select:focus { border-color: #38bdf8; }
+
+    .course-lock-status {
+      font-size: .75rem;
+      color: #facc15;
+      background: rgba(250,204,21,.1);
+      border: 1px solid rgba(250,204,21,.3);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
 
     .course-actions {
       display: flex;
@@ -942,9 +955,11 @@
       <div class="course-selector-group">
         <span class="course-label">📚 선택된 코스:</span>
         <select class="course-select" id="courseSelect"></select>
+        <span class="course-lock-status" id="courseLockBadge" style="display:none">🔒 비밀번호 보호됨</span>
       </div>
       <div class="course-actions">
         <button class="btn-c-action primary" id="newCourseBtn">➕ 새 코스 만들기</button>
+        <button class="btn-c-action" id="pwdCourseBtn">🔒 비번 설정/변경</button>
         <button class="btn-c-action" id="renameCourseBtn">✏️ 코스 이름 변경</button>
         <button class="btn-c-action" id="dupCourseBtn">📋 코스 복사</button>
         <button class="btn-c-action danger" id="delCourseBtn">🗑️ 코스 삭제</button>
@@ -1214,6 +1229,16 @@
         .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
+    // Password Verification Helper
+    function verifyCoursePassword(course, actionName = "작업") {
+      if (!course.password) return true; // 비밀번호 미설정된 코스는 바로 통과
+      const input = prompt(`'${course.name}' 코스는 비밀번호로 보호되어 있습니다.\n${actionName}을(를) 진행하려면 비밀번호를 입력하세요:`);
+      if (input === null) return false; // 취소 누름
+      if (input === course.password) return true;
+      alert('🔒 비밀번호가 일치하지 않습니다.');
+      return false;
+    }
+
     // Helper: normalize slot indices to array
     function getSlotsOfClass(cls) {
       if (Array.isArray(cls.slotIdxs)) return cls.slotIdxs;
@@ -1228,6 +1253,7 @@
         const defaultCourse = {
           id: 'course_' + uid(),
           name: '기본 코스 A',
+          password: '',
           data: oldV2Data && Array.isArray(oldV2Data) ? oldV2Data : [
             { id: uid(), subject: '초급 읽기', level: '초급', type: '읽기', slotIdxs: [4], days: ['mon'], color: null },
             { id: uid(), subject: '중급 듣기_전', level: '중급', type: '듣기', slotIdxs: [4], days: ['mon'], color: null },
@@ -1265,13 +1291,24 @@
     function renderCourseSelect() {
       const select = document.getElementById('courseSelect');
       select.innerHTML = '';
+      const active = getActiveCourse();
+
       courses.forEach(c => {
         const opt = document.createElement('option');
         opt.value = c.id;
-        opt.textContent = `${c.name} (${c.data ? c.data.length : 0}개 수업)`;
+        const lockIcon = c.password ? '🔒 ' : '';
+        opt.textContent = `${lockIcon}${c.name} (${c.data ? c.data.length : 0}개 수업)`;
         if (c.id === activeCourseId) opt.selected = true;
         select.appendChild(opt);
       });
+
+      // Update password lock status badge
+      const lockBadge = document.getElementById('courseLockBadge');
+      if (active && active.password) {
+        lockBadge.style.display = 'inline-flex';
+      } else {
+        lockBadge.style.display = 'none';
+      }
     }
 
     /* ── HELPERS ── */
@@ -1360,16 +1397,21 @@
             e.preventDefault();
             td.classList.remove('drag-over');
 
+            const active = getActiveCourse();
+            if (!active) return;
+            
+            // Verify password if course is locked before moving cards
+            if (active.password && !verifyCoursePassword(active, "시간표 순서 변경")) {
+              return;
+            }
+
             const id = draggedClsId || (e.dataTransfer ? e.dataTransfer.getData('text/plain') : null);
             if (!id) return;
 
             const targetDay  = td.dataset.day;
             const targetSlot = parseInt(td.dataset.slot, 10);
 
-            const active = getActiveCourse();
-            if (!active) return;
             let cData = active.data || [];
-
             const draggedCls = cData.find(c => c.id === id);
             if (!draggedCls) return;
 
@@ -1459,8 +1501,12 @@
     function moveClassInCell(clsId, dir) {
       const active = getActiveCourse();
       if (!active) return;
-      let cData = active.data || [];
 
+      if (active.password && !verifyCoursePassword(active, "순서 변경")) {
+        return;
+      }
+
+      let cData = active.data || [];
       const idx = cData.findIndex(c => c.id === clsId);
       if (idx === -1) return;
 
@@ -1568,9 +1614,12 @@
       const name = prompt('새 코스(시간표 프리셋)의 이름을 입력하세요:', `코스 ${courses.length + 1}`);
       if (!name || !name.trim()) return;
 
+      const pwd = prompt('🔒 코스 보호용 비밀번호를 설정하세요 (선택 사항, 없으면 비워두고 확인):') ?? '';
+
       const newCourse = {
         id: 'course_' + uid(),
         name: name.trim(),
+        password: pwd.trim(),
         data: []
       };
       courses.push(newCourse);
@@ -1580,9 +1629,31 @@
       render();
     });
 
+    document.getElementById('pwdCourseBtn').addEventListener('click', () => {
+      const active = getActiveCourse();
+      if (!active) return;
+
+      if (active.password && !verifyCoursePassword(active, "비밀번호 설정 변경")) {
+        return;
+      }
+
+      const newPwd = prompt('🔒 새 비밀번호를 입력하세요 (비밀번호를 해제하려면 빈칸으로 확인):');
+      if (newPwd === null) return;
+
+      active.password = newPwd.trim();
+      save(LS_COURSES, courses);
+      alert(active.password ? '🔒 비밀번호가 성공적으로 설정되었습니다.' : '🔓 비밀번호 보호가 해제되었습니다.');
+      render();
+    });
+
     document.getElementById('renameCourseBtn').addEventListener('click', () => {
       const active = getActiveCourse();
       if (!active) return;
+
+      if (active.password && !verifyCoursePassword(active, "이름 변경")) {
+        return;
+      }
+
       const newName = prompt('코스 이름을 수정하세요:', active.name);
       if (!newName || !newName.trim()) return;
 
@@ -1595,9 +1666,14 @@
       const active = getActiveCourse();
       if (!active) return;
 
+      if (active.password && !verifyCoursePassword(active, "코스 복사")) {
+        return;
+      }
+
       const dupCourse = {
         id: 'course_' + uid(),
         name: active.name + ' (사본)',
+        password: active.password || '',
         data: JSON.parse(JSON.stringify(active.data || []))
       };
       courses.push(dupCourse);
@@ -1613,6 +1689,12 @@
         return;
       }
       const active = getActiveCourse();
+      
+      // Verify password if course is locked
+      if (active.password && !verifyCoursePassword(active, "삭제")) {
+        return;
+      }
+
       if (!confirm(`'${active.name}' 코스를 정말 삭제하시겠습니까?`)) return;
 
       courses = courses.filter(c => c.id !== active.id);
@@ -1695,6 +1777,11 @@
 
     /* ── MODAL ── */
     function openModal(id = null, presetSlot = null, presetDay = null) {
+      const active = getActiveCourse();
+      if (active && active.password) {
+        if (!verifyCoursePassword(active, "수업 수정/추가")) return;
+      }
+
       editId    = id;
       pickColor = null;
 
@@ -1710,7 +1797,6 @@
 
       buildColorPicker();
 
-      const active = getActiveCourse();
       const currentData = active ? active.data || [] : [];
 
       if (id) {
