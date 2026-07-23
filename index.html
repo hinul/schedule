@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>수업 시간표 | 한국어 아카데미</title>
-  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 1회 인증 원터치 편집 모드, 최적화 수평 정렬 패킹 알고리즘">
+  <meta name="description" content="한국어 아카데미 주간 수업 시간표 — 과목별 고유 전용 라인 수평 정렬, 깔끔한 투명 여백 지원">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -627,7 +627,7 @@
       box-shadow: 0 8px 20px rgba(0,0,0,.25);
     }
 
-    /* Completely Invisible Layout Spacer Placeholder */
+    /* Completely Invisible Layout Spacer Placeholder (No dashed lines) */
     .cls-card-placeholder {
       min-height: 48px;
       margin-bottom: 5px;
@@ -1237,7 +1237,7 @@
     let courses      = load(LS_COURSES) || [];
     let activeCourseId = load(LS_ACTIVE)  || null;
     let showMY       = load(LS_MY)      || false;
-    let isUnlocked   = false; // Session unlock state
+    let isUnlocked   = false;
 
     let filters  = { level: new Set(), type: new Set(), period: new Set() };
     let editId   = null;
@@ -1410,7 +1410,7 @@
       return lv && ty;
     }
 
-    /* ── TABLE RENDER & OPTIMAL SUB-ROW PACKING ALGORITHM ── */
+    /* ── TABLE RENDER & DEDICATED SUBJECT SUB-ROW ALIGNMENT ── */
     function render() {
       const tbody = document.getElementById('schedBody');
       tbody.innerHTML = '';
@@ -1454,53 +1454,16 @@
         `;
         tr.appendChild(ttd);
 
-        /* 🌟 OPTIMAL SUB-ROW PACKING FOR TIME SLOT 🌟 */
-        // Collect distinct subject names in current slot
-        const slotSubjects = [];
+        /* 🌟 DEDICATED SUB-ROW PER UNIQUE SUBJECT 🌟 */
+        // Each distinct subject gets its OWN fixed, exclusive line across the time slot
+        const slotSubjectKeys = [];
         currentData.forEach(c => {
           if (getSlotsOfClass(c).includes(slot.i)) {
             const key = (c.subject || '').trim();
-            if (key && !slotSubjects.includes(key)) {
-              slotSubjects.push(key);
+            if (key && !slotSubjectKeys.includes(key)) {
+              slotSubjectKeys.push(key);
             }
           }
-        });
-
-        // Pack non-overlapping subjects into shared sub-rows to eliminate vertical gaps!
-        const subjectSubRowMap = new Map();
-        const subRowOccupancy = []; // Array of Sets containing occupied day keys per sub-row
-
-        slotSubjects.forEach(subjKey => {
-          const subjectDays = new Set();
-          currentData.forEach(c => {
-            if ((c.subject || '').trim() === subjKey && getSlotsOfClass(c).includes(slot.i)) {
-              c.days.forEach(d => subjectDays.add(d));
-            }
-          });
-
-          // Find first sub-row r with NO day overlap
-          let assignedR = -1;
-          for (let r = 0; r < subRowOccupancy.length; r++) {
-            let overlap = false;
-            for (let d of subjectDays) {
-              if (subRowOccupancy[r].has(d)) {
-                overlap = true;
-                break;
-              }
-            }
-            if (!overlap) {
-              assignedR = r;
-              break;
-            }
-          }
-
-          if (assignedR === -1) {
-            assignedR = subRowOccupancy.length;
-            subRowOccupancy.push(new Set());
-          }
-
-          subjectDays.forEach(d => subRowOccupancy[assignedR].add(d));
-          subjectSubRowMap.set(subjKey, assignedR);
         });
 
         /* Day cells */
@@ -1583,27 +1546,32 @@
             c.days.includes(day.key) && getSlotsOfClass(c).includes(slot.i)
           );
 
-          if (dayClasses.length > 0) {
-            // Find max sub-row required for this day
-            let maxRInDay = -1;
-            dayClasses.forEach(dc => {
-              const r = subjectSubRowMap.get((dc.subject || '').trim());
-              if (typeof r === 'number' && r > maxRInDay) {
-                maxRInDay = r;
+          if (slotSubjectKeys.length > 1 && dayClasses.length > 0) {
+            // Find highest dedicated sub-row index required for this day
+            let maxSubRowIdx = -1;
+            slotSubjectKeys.forEach((subjKey, subIdx) => {
+              if (dayClasses.some(dc => (dc.subject || '').trim() === subjKey)) {
+                maxSubRowIdx = subIdx;
               }
             });
 
-            for (let r = 0; r <= maxRInDay; r++) {
-              const cls = dayClasses.find(dc => subjectSubRowMap.get((dc.subject || '').trim()) === r);
+            slotSubjectKeys.forEach((subjKey, subIdx) => {
+              if (subIdx > maxSubRowIdx) return; // Skip trailing empty spacers
+
+              const cls = dayClasses.find(dc => (dc.subject || '').trim() === subjKey);
               if (cls) {
-                td.appendChild(makeCard(cls, day.key, slot.i, r, maxRInDay + 1));
+                td.appendChild(makeCard(cls, day.key, slot.i, subIdx, slotSubjectKeys.length));
               } else {
-                // Invisible layout spacer placeholder
+                // Completely INVISIBLE layout spacer placeholder (No dashed box!)
                 const ph = document.createElement('div');
                 ph.className = 'cls-card-placeholder';
                 td.appendChild(ph);
               }
-            }
+            });
+          } else {
+            dayClasses.forEach((cls, cellIdx) => {
+              td.appendChild(makeCard(cls, day.key, slot.i, cellIdx, dayClasses.length));
+            });
           }
 
           /* + button */
