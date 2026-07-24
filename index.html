@@ -1470,8 +1470,9 @@
       const customLevels = [];
 
       currentData.forEach(c => {
-        if (c.level && !baseLevels.includes(c.level) && !customLevels.includes(c.level)) {
-          customLevels.push(c.level);
+        const lv = (c.level || '').trim();
+        if (lv && !baseLevels.includes(lv) && !customLevels.includes(lv)) {
+          customLevels.push(lv);
         }
       });
 
@@ -1484,16 +1485,16 @@
         btn.dataset.filter = 'level';
         btn.dataset.val = lv;
         btn.textContent = lv;
-        btn.addEventListener('click', () => {
-          toggleFilter('level', lv);
-        });
         container.appendChild(btn);
       });
     }
 
     function matchesFilter(cls) {
-      const lv = filters.level.size === 0 || (cls.level && filters.level.has(cls.level));
-      const ty = filters.type.size  === 0 || (cls.type && filters.type.has(cls.type));
+      const clsLv = (cls.level || '').trim();
+      const clsTy = (cls.type || '').trim();
+
+      const lv = filters.level.size === 0 || (clsLv && filters.level.has(clsLv));
+      const ty = filters.type.size  === 0 || (clsTy && filters.type.has(clsTy));
       const pe = filters.period.size === 0 || getSlotsOfClass(cls).some(sIdx => {
         const slotObj = SLOTS[sIdx];
         return slotObj && filters.period.has(slotObj.period);
