@@ -8,6 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- html2canvas for Image Download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- SheetJS for Excel Download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     /* ====================================================
        RESET & TOKENS
@@ -1026,7 +1030,9 @@
         <button class="btn-c-action" id="pwdCourseBtn">🔒 비번 설정/변경</button>
         <button class="btn-c-action" id="renameCourseBtn">✏️ 코스 이름 변경</button>
         <button class="btn-c-action" id="dupCourseBtn">📋 코스 복사</button>
-        <button class="btn-c-action" id="exportBtn" title="시간표 백업 파일(.json) 저장">📤 시간표 백업</button>
+        <button class="btn-c-action" id="exportImgBtn" title="시간표를 PNG 이미지 파일로 저장">🖼️ 이미지 저장</button>
+        <button class="btn-c-action" id="exportExcelBtn" title="시간표를 엑셀(.xlsx) 파일로 저장">📊 엑셀 저장</button>
+        <button class="btn-c-action" id="exportBtn" title="시간표 백업 파일(.json) 저장">📤 백업(JSON)</button>
         <button class="btn-c-action" id="importBtn" title="시간표 백업 파일(.json) 불러오기">📥 불러오기</button>
         <input type="file" id="importFileInput" accept=".json">
         <button class="btn-c-action danger" id="delCourseBtn">🗑️ 코스 삭제</button>
@@ -1038,7 +1044,7 @@
   <div class="filter-bar-wrap">
     <div class="filter-bar">
 
-      <div class="filter-group">
+      <div class="filter-group" id="levelFilterGroup">
         <span class="filter-group-label">급수</span>
         <button class="f-chip" data-filter="level" data-val="초급">초급</button>
         <button class="f-chip" data-filter="level" data-val="중급">중급</button>
@@ -1446,14 +1452,68 @@
       return typeColor(cls.type);
     }
 
+    function toggleFilter(fType, val) {
+      if (filters[fType].has(val)) {
+        filters[fType].delete(val);
+      } else {
+        filters[fType].add(val);
+      }
+      render();
+    }
+
+    function updateLevelFilterChips() {
+      const container = document.getElementById('levelFilterGroup');
+      if (!container) return;
+
+      const currentData = getActiveCourse() ? getActiveCourse().data || [] : [];
+      const baseLevels = ['초급', '중급', '고급'];
+      const customLevels = [];
+
+      currentData.forEach(c => {
+        if (c.level && !baseLevels.includes(c.level) && !customLevels.includes(c.level)) {
+          customLevels.push(c.level);
+        }
+      });
+
+      const allLevels = [...baseLevels, ...customLevels];
+
+      container.innerHTML = '<span class="filter-group-label">급수</span>';
+      allLevels.forEach(lv => {
+        const btn = document.createElement('button');
+        btn.className = 'f-chip' + (filters.level.has(lv) ? ' on' : '');
+        btn.dataset.filter = 'level';
+        btn.dataset.val = lv;
+        btn.textContent = lv;
+        btn.addEventListener('click', () => {
+          toggleFilter('level', lv);
+        });
+        container.appendChild(btn);
+      });
+    }
+
     function matchesFilter(cls) {
-      const lv = filters.level.size === 0 || filters.level.has(cls.level);
-      const ty = filters.type.size  === 0 || filters.type.has(cls.type);
-      return lv && ty;
+      const lv = filters.level.size === 0 || (cls.level && filters.level.has(cls.level));
+      const ty = filters.type.size  === 0 || (cls.type && filters.type.has(cls.type));
+      const pe = filters.period.size === 0 || getSlotsOfClass(cls).some(sIdx => {
+        const slotObj = SLOTS[sIdx];
+        return slotObj && filters.period.has(slotObj.period);
+      });
+      return lv && ty && pe;
     }
 
     /* ── TABLE RENDER & DEDICATED SUBJECT SUB-ROW ALIGNMENT ── */
     function render() {
+      updateLevelFilterChips();
+
+      // Sync filter chip 'on' states
+      document.querySelectorAll('.f-chip[data-filter]').forEach(btn => {
+        const fType = btn.dataset.filter;
+        const val = btn.dataset.val;
+        if (filters[fType]) {
+          btn.classList.toggle('on', filters[fType].has(val));
+        }
+      });
+
       const tbody = document.getElementById('schedBody');
       tbody.innerHTML = '';
 
@@ -1478,10 +1538,15 @@
           const ptd = document.createElement('td');
           ptd.rowSpan = 3;
           ptd.className = 'td-period';
+          ptd.style.cursor = 'pointer';
+          ptd.title = `클릭하여 ${slot.label} 시간대만 필터링 (${filters.period.has(slot.period) ? '해제' : '선택'})`;
           ptd.innerHTML = `<div class="td-period-inner">
             <span class="td-period-emoji">${slot.emoji}</span>
             <span class="td-period-text">${slot.label}</span>
           </div>`;
+          ptd.addEventListener('click', () => {
+            toggleFilter('period', slot.period);
+          });
           tr.appendChild(ptd);
           prevPeriod = slot.period;
         }
@@ -1676,18 +1741,22 @@
       const visible = matchesFilter(cls);
 
       const card = document.createElement('div');
-      card.className = 'cls-card' + (visible ? '' : ' dimmed');
+      card.className = 'cls-card';
+      if (!visible) {
+        card.style.display = 'none';
+      }
+
       card.draggable = true;
       card.dataset.id = cls.id;
       card.dataset.day = dayKey;
       card.dataset.slot = slotIdx;
 
-      card.style.cssText =
-        `background:${c.bg};color:${c.txt};border-left-color:${c.brd}`;
+      card.style.cssText +=
+        `;background:${c.bg};color:${c.txt};border-left-color:${c.brd}`;
 
       let tags = '';
-      if (cls.level) tags += `<span class="card-tag">${esc(cls.level)}</span>`;
-      if (cls.type)  tags += `<span class="card-tag">${esc(cls.type)}</span>`;
+      if (cls.level) tags += `<span class="card-tag" data-ftype="level" data-fval="${esc(cls.level)}">${esc(cls.level)}</span>`;
+      if (cls.type)  tags += `<span class="card-tag" data-ftype="type" data-fval="${esc(cls.type)}">${esc(cls.type)}</span>`;
 
       // Build Order buttons if there are multiple cards in this cell
       let orderBtnsHtml = '';
@@ -1707,6 +1776,16 @@
         </div>
         ${tags ? `<div class="card-tags">${tags}</div>` : ''}
       `;
+
+      // Tag click filtering
+      card.querySelectorAll('.card-tag').forEach(tag => {
+        tag.style.cursor = 'pointer';
+        tag.title = `'${tag.dataset.fval}' 필터링하기`;
+        tag.addEventListener('click', e => {
+          e.stopPropagation();
+          toggleFilter(tag.dataset.ftype, tag.dataset.fval);
+        });
+      });
 
       // Order button click handlers
       const btnUp = card.querySelector('.btn-up');
@@ -1867,7 +1946,131 @@
       render();
     });
 
-    /* ── EXPORT & IMPORT (JSON BACKUP & SHARE) ── */
+    /* ── EXPORT & IMPORT (IMAGE, EXCEL, JSON BACKUP) ── */
+    document.getElementById('exportImgBtn').addEventListener('click', async () => {
+      if (typeof html2canvas === 'undefined') {
+        alert('이미지 생성 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
+        return;
+      }
+
+      const active = getActiveCourse();
+      const courseName = active ? active.name : '시간표';
+
+      const btn = document.getElementById('exportImgBtn');
+      const origText = btn.textContent;
+      btn.textContent = '⏳ 이미지 생성 중...';
+      btn.disabled = true;
+
+      try {
+        const target = document.querySelector('.tbl-wrap') || document.getElementById('schedTbl');
+        const canvas = await html2canvas(target, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          logging: false
+        });
+
+        const dataUrl = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        const dateStr = new Date().toISOString().slice(0, 10);
+        a.download = `korean_academy_${courseName.replace(/\s+/g, '_')}_${dateStr}.png`;
+        a.click();
+      } catch (err) {
+        alert('이미지 저장 중 오류가 발생했습니다: ' + err.message);
+      } finally {
+        btn.textContent = origText;
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('exportExcelBtn').addEventListener('click', () => {
+      if (typeof XLSX === 'undefined') {
+        alert('엑셀 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
+        return;
+      }
+
+      const active = getActiveCourse();
+      const courseName = active ? active.name : '시간표';
+      const currentData = active ? active.data || [] : [];
+      const dateStr = new Date().toISOString().slice(0, 10);
+
+      // 1. Grid Worksheet
+      const headers = ['시간대', '베트남 시간 (VN)', '한국 시간 (KR)'];
+      if (showMY) headers.push('말레이시아 시간 (MY)');
+      DAYS.forEach(d => headers.push(d.label + '요일'));
+
+      const gridData = [headers];
+
+      SLOTS.forEach(slot => {
+        const row = [
+          `${slot.emoji} ${slot.label}`,
+          slot.vn,
+          slot.kr
+        ];
+        if (showMY) row.push(slot.my);
+
+        DAYS.forEach(day => {
+          const dayClasses = currentData.filter(c =>
+            c.days.includes(day.key) && getSlotsOfClass(c).includes(slot.i)
+          );
+          if (dayClasses.length === 0) {
+            row.push('');
+          } else {
+            const cellText = dayClasses.map(c => {
+              const tags = [c.level, c.type].filter(Boolean).join('/');
+              return tags ? `${c.subject} [${tags}]` : c.subject;
+            }).join('\n');
+            row.push(cellText);
+          }
+        });
+
+        gridData.push(row);
+      });
+
+      const wsGrid = XLSX.utils.aoa_to_sheet(gridData);
+      const colWidths = [{ wch: 10 }, { wch: 16 }, { wch: 16 }];
+      if (showMY) colWidths.push({ wch: 16 });
+      DAYS.forEach(() => colWidths.push({ wch: 24 }));
+      wsGrid['!cols'] = colWidths;
+
+      // 2. Class List Worksheet
+      const listHeaders = ['코스명', '과목명', '급수', '수업 유형', '요일', '시간대 (VN)', '시간대 (KR)'];
+      const listData = [listHeaders];
+
+      currentData.forEach(c => {
+        const dayNames = c.days.map(dk => {
+          const dObj = DAYS.find(d => d.key === dk);
+          return dObj ? dObj.label + '요일' : dk;
+        }).join(', ');
+
+        const slotIdxs = getSlotsOfClass(c);
+        const vnTimes = slotIdxs.map(i => SLOTS[i] ? SLOTS[i].vn : '').join(' / ');
+        const krTimes = slotIdxs.map(i => SLOTS[i] ? SLOTS[i].kr : '').join(' / ');
+
+        listData.push([
+          courseName,
+          c.subject || '',
+          c.level || '-',
+          c.type || '-',
+          dayNames || '-',
+          vnTimes || '-',
+          krTimes || '-'
+        ]);
+      });
+
+      const wsList = XLSX.utils.aoa_to_sheet(listData);
+      wsList['!cols'] = [
+        { wch: 18 }, { wch: 22 }, { wch: 10 }, { wch: 12 }, { wch: 20 }, { wch: 22 }, { wch: 22 }
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, wsGrid, '주간 시간표');
+      XLSX.utils.book_append_sheet(wb, wsList, '수업 상세 목록');
+
+      XLSX.writeFile(wb, `korean_academy_${courseName.replace(/\s+/g, '_')}_${dateStr}.xlsx`);
+    });
+
     document.getElementById('exportBtn').addEventListener('click', () => {
       const exportData = {
         version: 'koa_v1',
@@ -1944,24 +2147,18 @@
     });
 
     /* ── FILTERS ── */
-    document.querySelectorAll('.f-chip').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const fType = btn.dataset.filter;
-        const val   = btn.dataset.val;
-        if (filters[fType].has(val)) {
-          filters[fType].delete(val);
-          btn.classList.remove('on');
-        } else {
-          filters[fType].add(val);
-          btn.classList.add('on');
-        }
-        render();
-      });
+    document.querySelector('.filter-bar').addEventListener('click', e => {
+      const btn = e.target.closest('.f-chip');
+      if (!btn) return;
+      const fType = btn.dataset.filter;
+      const val   = btn.dataset.val;
+      if (!fType || !val) return;
+
+      toggleFilter(fType, val);
     });
 
     document.getElementById('resetBtn').addEventListener('click', () => {
       filters = { level: new Set(), type: new Set(), period: new Set() };
-      document.querySelectorAll('.f-chip.on').forEach(b => b.classList.remove('on'));
       render();
     });
 
